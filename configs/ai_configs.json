@@ -1,0 +1,37 @@
+{
+  "configs": {
+    "anthropic": {
+      "type": "anthropic",
+      "api_key": "",
+      "model": "claude-3-opus-20240229",
+      "endpoint": "",
+      "api_version": "",
+      "proxy_url": ""
+    },
+    "baidu": {
+      "type": "baidu",
+      "api_key": "",
+      "model": "ERNIE-Bot-4",
+      "endpoint": "",
+      "api_version": "",
+      "proxy_url": ""
+    },
+    "deepseek": {
+      "type": "deepseek",
+      "api_key": "",
+      "model": "deepseek-reasoner",
+      "endpoint": "https://api.deepseek.com/chat/completions",
+      "api_version": "",
+      "proxy_url": ""
+    },
+    "openai": {
+      "type": "openai",
+      "api_key": "",
+      "model": "gpt-3.5-turbo",
+      "endpoint": "https://api.openai.com/v1/chat/completions",
+      "api_version": "",
+      "proxy_url": "http://127.0.0.1:7890"
+    }
+  },
+  "current": "openai"
+}

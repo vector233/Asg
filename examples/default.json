@@ -1,0 +1,90 @@
+{
+  "name": "高级自动化任务示例",
+  "description": "演示条件判断和循环功能的自动化任务",
+  "actions": [
+    {
+      "type": "if",
+      "condition": "window_exists:Notes",
+      "then_actions": [
+        {
+          "type": "activate",
+          "process_name": "Notes"
+        },
+        {
+          "type": "sleep",
+          "duration": 1
+        },
+        {
+          "type": "type",
+          "text": "Notes 应用已经打开"
+        },
+        {
+          "type": "key",
+          "key": "return"
+        },
+        {
+          "type": "sleep",
+          "duration": 0.5
+        }
+      ],
+      "else_actions": [
+        {
+          "type": "key",
+          "key": "space",
+          "modifiers": ["command"]
+        },
+        {
+          "type": "sleep",
+          "duration": 1
+        },
+        {
+          "type": "type",
+          "text": "Notes"
+        },
+        {
+          "type": "key",
+          "key": "return"
+        },
+        {
+          "type": "sleep",
+          "duration": 2
+        }
+      ]
+    },
+    {
+      "type": "for",
+      "count": 3,
+      "loop_actions": [
+        {
+          "type": "type",
+          "text": "这是循环输入的文本，第"
+        },
+        {
+          "type": "key",
+          "key": "space"
+        },
+        {
+          "type": "key",
+          "key": "return"
+        },
+        {
+          "type": "sleep",
+          "duration": 0.3
+        }
+      ]
+    },
+    {
+      "type": "sleep",
+      "duration": 1
+    },
+    {
+      "type": "key",
+      "key": "s",
+      "modifiers": ["command"]
+    },
+    {
+      "type": "sleep",
+      "duration": 0.5
+    }
+  ]
+}
