@@ -13,12 +13,12 @@ import (
 
 // 支持的语言
 const (
-	LangZH = "zh" // 中文
-	LangEN = "en" // 英文
+	LangZH = "zh"
+	LangEN = "en"
 )
 
 var (
-	currentLang  = LangZH // 默认语言为中文
+	currentLang  = LangEN // Default language is English
 	translations = make(map[string]map[string]string)
 	mutex        sync.RWMutex
 )

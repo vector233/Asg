@@ -19,18 +19,18 @@ import (
 	"github.com/vector233/AsgGPT/pkg/utils"
 )
 
-// UIConfig 存储 UI 相关配置
+// UIConfig stores UI related configuration
 type UIConfig struct {
 	ConfigDir string `json:"config_dir"`
 }
 
-// 获取 UI 配置文件路径
+// Get UI configuration file path
 func getUIConfigPath() string {
 	configDir := utils.GetConfigDir()
 	return filepath.Join(configDir, "ui_config.json")
 }
 
-// 保存配置目录设置
+// Save configuration directory setting
 func saveConfigDir(dir string) error {
 	config := UIConfig{
 		ConfigDir: dir,
@@ -42,13 +42,13 @@ func saveConfigDir(dir string) error {
 	}
 
 	configPath := getUIConfigPath()
-	// 确保目录存在
+	// Ensure directory exists
 	os.MkdirAll(filepath.Dir(configPath), 0755)
 
 	return os.WriteFile(configPath, data, 0644)
 }
 
-// 加载配置目录设置
+// Load configuration directory setting
 func loadConfigDir() (string, error) {
 	configPath := getUIConfigPath()
 	data, err := os.ReadFile(configPath)
@@ -64,38 +64,38 @@ func loadConfigDir() (string, error) {
 	return config.ConfigDir, nil
 }
 
-// initConfigDir 初始化配置目录
+// initConfigDir initializes the configuration directory
 func (g *GUI) initConfigDir() {
-	// 获取基础配置目录
+	// Get base configuration directory
 	baseDir := filepath.Dir(utils.GetConfigDir())
-	// 配置目录设置为 examples 子目录
+	// Set configuration directory to examples subdirectory
 	g.configDir = filepath.Join(baseDir, "examples")
 
-	// 尝试从设置中加载配置目录
+	// Try to load configuration directory from settings
 	if dir, err := loadConfigDir(); err == nil && dir != "" {
 		g.configDir = dir
 	}
 
-	// 确保 examples 目录存在
+	// Ensure examples directory exists
 	os.MkdirAll(g.configDir, 0755)
 
-	// 生成示例配置文件
+	// Generate example configuration files
 	g.generateExampleConfigs()
 
-	// 更新配置文件列表
+	// Update configuration file list
 	g.updateConfigFiles()
 }
 
-// generateExampleConfigs 生成示例配置文件
+// generateExampleConfigs generates example configuration files
 func (g *GUI) generateExampleConfigs() {
-	// 获取当前语言
+	// Get current language
 	currentLang := i18n.GetCurrentLang()
 
-	// 根据语言选择示例配置内容
+	// Select example configuration content based on language
 	var defaultExample string
 
 	if currentLang == i18n.LangZH {
-		// 中文示例
+		// Chinese example
 		defaultExample = `{
   "name": "自动化任务示例",
   "description": "这是一个示例任务，展示了支持的各种操作类型",
@@ -134,7 +134,7 @@ func (g *GUI) generateExampleConfigs() {
   ]
 }`
 	} else {
-		// 英文示例
+		// English example
 		defaultExample = `{
   "name": "Automation Task Example",
   "description": "This is an example task that demonstrates various supported operation types",
@@ -174,17 +174,17 @@ func (g *GUI) generateExampleConfigs() {
 }`
 	}
 
-	// 目标文件路径
+	// Target file path
 	targetPath := filepath.Join(g.configDir, "default.json")
 
-	// 检查目标文件是否已存在
+	// Check if target file already exists
 	if _, err := os.Stat(targetPath); os.IsNotExist(err) {
-		// 目标文件不存在，创建示例配置
+		// Target file doesn't exist, create example configuration
 		os.WriteFile(targetPath, []byte(defaultExample), 0644)
 	}
 }
 
-// updateConfigFiles 更新配置文件列表
+// updateConfigFiles updates the configuration file list
 func (g *GUI) updateConfigFiles() {
 	g.configFiles = []string{}
 	files, err := os.ReadDir(g.configDir)
@@ -196,40 +196,40 @@ func (g *GUI) updateConfigFiles() {
 		}
 	}
 
-	// 如果已经创建了下拉框，更新其选项
+	// If dropdown has already been created, update its options
 	if g.configSelect != nil {
 		g.configSelect.Options = g.configFiles
 	}
 }
 
-// createToolbar 创建工具栏
+// createToolbar creates the toolbar
 func (g *GUI) createToolbar() fyne.CanvasObject {
-	// 配置目录按钮
+	// Configuration directory button
 	dirButton := widget.NewButtonWithIcon(i18n.T("config_dir"), theme.FolderOpenIcon(), func() {
 		g.selectConfigDir()
 	})
 
-	// 创建配置文件选择下拉框
+	// Create configuration file selection dropdown
 	g.configSelect = widget.NewSelect(g.configFiles, func(selected string) {
 		g.loadConfigFile(selected)
 	})
 
-	// 刷新按钮
+	// Refresh button
 	refreshButton := widget.NewButtonWithIcon("", theme.ViewRefreshIcon(), func() {
 		g.updateConfigFiles()
 		g.statusLabel.SetText(i18n.T("config_refreshed"))
 	})
 
-	// 配置选择容器
+	// Configuration selection container
 	configSelectContainer := container.NewBorder(
 		nil, nil, nil, refreshButton,
 		g.configSelect,
 	)
 
-	// 创建语言选择器
+	// Create language selector
 	langSelector := g.createLanguageSelector()
 
-	// 返回工具栏
+	// Return toolbar
 	return container.NewHBox(
 		dirButton,
 		widget.NewLabel(i18n.T("config_file")),
@@ -238,9 +238,9 @@ func (g *GUI) createToolbar() fyne.CanvasObject {
 	)
 }
 
-// selectConfigDir 选择配置目录
+// selectConfigDir selects the configuration directory
 func (g *GUI) selectConfigDir() {
-	// 打开目录选择对话框
+	// Open directory selection dialog
 	dialog.ShowFolderOpen(func(uri fyne.ListableURI, err error) {
 		if err != nil {
 			dialog.ShowError(err, g.window)
@@ -250,11 +250,11 @@ func (g *GUI) selectConfigDir() {
 			return
 		}
 
-		// 更新配置目录
+		// Update configuration directory
 		g.configDir = uri.Path()
-		// 保存配置目录设置
+		// Save configuration directory setting
 		saveConfigDir(g.configDir)
-		// 更新配置文件列表
+		// Update configuration file list
 		g.updateConfigFiles()
 		g.configSelect.SetSelected("")
 
@@ -262,13 +262,13 @@ func (g *GUI) selectConfigDir() {
 	}, g.window)
 }
 
-// loadConfigFile 加载配置文件
+// loadConfigFile loads the configuration file
 func (g *GUI) loadConfigFile(selected string) {
 	if selected == "" {
 		return
 	}
 
-	// 加载选中的配置文件
+	// Load selected configuration file
 	configPath := filepath.Join(g.configDir, selected)
 	data, err := os.ReadFile(configPath)
 	if err != nil {
@@ -276,7 +276,7 @@ func (g *GUI) loadConfigFile(selected string) {
 		return
 	}
 
-	// 格式化 JSON 以便显示
+	// Format JSON for display
 	var prettyJSON bytes.Buffer
 	if err := json.Indent(&prettyJSON, data, "", "  "); err != nil {
 		g.jsonEditor.SetText(string(data))
@@ -287,7 +287,7 @@ func (g *GUI) loadConfigFile(selected string) {
 	g.statusLabel.SetText(fmt.Sprintf(i18n.T("config_loaded"), selected))
 }
 
-// saveConfig 保存配置
+// saveConfig saves the configuration
 func (g *GUI) saveConfig() {
 	jsonStr := g.jsonEditor.Text
 	if jsonStr == "" {
@@ -313,17 +313,17 @@ func (g *GUI) saveConfig() {
 
 		g.statusLabel.SetText(i18n.T("config_saved"))
 
-		// 保存后刷新配置文件列表
+		// Refresh configuration file list after saving
 		g.updateConfigFiles()
 	}, g.window)
 
-	// 设置默认保存目录和文件名
+	// Set default save directory and filename
 	saveDialog.SetFileName("config.json")
 
-	// 确保目录存在
+	// Ensure directory exists
 	os.MkdirAll(g.configDir, 0755)
 
-	// 设置保存位置为当前配置目录
+	// Set save location to current configuration directory
 	listURI, err := storage.ListerForURI(storage.NewFileURI(g.configDir))
 	if err == nil {
 		saveDialog.SetLocation(listURI)
@@ -331,7 +331,7 @@ func (g *GUI) saveConfig() {
 	saveDialog.Show()
 }
 
-// executeConfig 执行配置
+// executeConfig executes the configuration
 func (g *GUI) executeConfig() {
 	jsonStr := g.jsonEditor.Text
 	if jsonStr == "" {
@@ -339,31 +339,31 @@ func (g *GUI) executeConfig() {
 		return
 	}
 
-	// 创建临时文件
+	// Create temporary file
 	tempFile, err := os.CreateTemp("", "auto-config-*.json")
 	if err != nil {
 		dialog.ShowError(fmt.Errorf(i18n.Tf("create_temp_file_failed", err)), g.window)
 		return
 	}
 
-	// 将删除操作移到执行完成后
+	// Move deletion operation to after execution completes
 	tempFilePath := tempFile.Name()
 
-	// 写入配置
+	// Write configuration
 	_, err = tempFile.WriteString(jsonStr)
 	if err != nil {
 		dialog.ShowError(fmt.Errorf(i18n.Tf("write_config_failed", err)), g.window)
-		os.Remove(tempFilePath) // 如果写入失败，立即删除文件
+		os.Remove(tempFilePath) // If writing fails, delete file immediately
 		return
 	}
 	tempFile.Close()
 
 	g.statusLabel.SetText(i18n.T("executing"))
 
-	// 在后台执行
+	// Execute in background
 	go func() {
 		err := automation.ExecuteConfigFile(tempFilePath)
-		// 执行完成后删除临时文件
+		// Delete temporary file after execution completes
 		os.Remove(tempFilePath)
 
 		if err != nil {
