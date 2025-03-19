@@ -1,16 +1,16 @@
 package ai
 
-// AIConfig 表示 AI 配置
+// AIConfig represents the AI platform configuration
 type AIConfig struct {
-	Type       string `json:"type"`
-	APIKey     string `json:"api_key"`
-	Model      string `json:"model"`
-	Endpoint   string `json:"endpoint"`
-	APIVersion string `json:"api_version"`
-	ProxyURL   string `json:"proxy_url"` // 添加代理 URL 字段
+	Type       string `json:"type"`        // AI platform type
+	APIKey     string `json:"api_key"`     // API key for authentication
+	Model      string `json:"model"`       // Model name to use
+	Endpoint   string `json:"endpoint"`    // Custom API endpoint
+	APIVersion string `json:"api_version"` // API version (Azure specific)
+	ProxyURL   string `json:"proxy_url"`   // Proxy URL for API requests
 }
 
-// GetAIConfigByType 根据类型获取 AI 配置
+// GetAIConfigByType retrieves AI configuration by platform type
 func GetAIConfigByType(platformType string) (AIConfig, error) {
 	configs, err := LoadAllAIConfigs()
 	if err != nil {
@@ -19,12 +19,12 @@ func GetAIConfigByType(platformType string) (AIConfig, error) {
 
 	config, exists := configs.Configs[platformType]
 	if !exists {
-		// 如果不存在，返回该类型的默认配置
+		// Return default configuration if not exists
 		config = AIConfig{
 			Type: platformType,
 		}
 
-		// 根据平台类型设置默认值
+		// Set default values based on platform type
 		switch platformType {
 		case AITypeOpenAI:
 			config.Model = "gpt-3.5-turbo"

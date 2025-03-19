@@ -11,7 +11,7 @@ import (
 	"github.com/vector233/AsgGPT/pkg/utils"
 )
 
-// 支持的语言
+// Supported languages
 const (
 	LangZH = "zh"
 	LangEN = "en"
@@ -23,45 +23,43 @@ var (
 	mutex        sync.RWMutex
 )
 
-// 初始化翻译数据
+// Initialize translation data
 func init() {
-	// 加载翻译文件
 	err := loadTranslations()
 	if err != nil {
-		fmt.Printf("加载翻译文件失败: %v\n", err)
+		fmt.Printf("Failed to load translation files: %v\n", err)
 	}
 }
 
-// 加载翻译文件
+// Load translation files
 func loadTranslations() error {
-	// 获取配置目录
 	configDir := utils.GetConfigDir()
 	i18nDir := filepath.Join(configDir, "i18n")
 
-	// 确保目录存在
+	// Ensure directory exists
 	if err := os.MkdirAll(i18nDir, 0755); err != nil {
 		return err
 	}
 
-	// 获取默认翻译
+	// Get default translations
 	defaultZHTranslations := getDefaultZHTranslations()
 	defaultENTranslations := getDefaultENTranslations()
 
-	// 加载中文翻译
+	// Load Chinese translations
 	zhPath := filepath.Join(i18nDir, "zh.json")
 	zhTranslations, err := loadAndUpdateTranslation(zhPath, defaultZHTranslations)
 	if err != nil {
 		return err
 	}
 
-	// 加载英文翻译
+	// Load English translations
 	enPath := filepath.Join(i18nDir, "en.json")
 	enTranslations, err := loadAndUpdateTranslation(enPath, defaultENTranslations)
 	if err != nil {
 		return err
 	}
 
-	// 保存翻译
+	// Save translations
 	mutex.Lock()
 	translations[LangZH] = zhTranslations
 	translations[LangEN] = enTranslations
@@ -70,29 +68,28 @@ func loadTranslations() error {
 	return nil
 }
 
-// 加载并更新翻译文件
+// Load and update translation file
 func loadAndUpdateTranslation(path string, defaultTranslations map[string]string) (map[string]string, error) {
 	var translations map[string]string
 	var updated bool
 
-	// 检查文件是否存在
+	// Check if file exists
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		// 如果文件不存在，使用默认翻译
 		translations = defaultTranslations
 		updated = true
 	} else {
-		// 读取现有翻译文件
+		// Read existing translation file
 		data, err := os.ReadFile(path)
 		if err != nil {
 			return nil, err
 		}
 
-		// 解析翻译
+		// Parse translations
 		if err := json.Unmarshal(data, &translations); err != nil {
 			return nil, err
 		}
 
-		// 检查并添加缺失的翻译
+		// Check and add missing translations
 		for key, value := range defaultTranslations {
 			if _, exists := translations[key]; !exists {
 				translations[key] = value
@@ -101,7 +98,7 @@ func loadAndUpdateTranslation(path string, defaultTranslations map[string]string
 		}
 	}
 
-	// 如果有更新，保存到文件
+	// Save to file if updated
 	if updated {
 		data, err := json.MarshalIndent(translations, "", "  ")
 		if err != nil {
@@ -116,7 +113,7 @@ func loadAndUpdateTranslation(path string, defaultTranslations map[string]string
 	return translations, nil
 }
 
-// 获取默认中文翻译
+// GetDefaultZHTranslations 获取默认中文翻译
 func getDefaultZHTranslations() map[string]string {
 	return map[string]string{
 		// GUI通用
@@ -522,36 +519,33 @@ Please return only the JSON configuration without any other explanations.`,
 	}
 }
 
-// GetCurrentLang 获取当前语言
+// Get current language
 func GetCurrentLang() string {
 	mutex.RLock()
 	defer mutex.RUnlock()
 	return currentLang
 }
 
-// SetLang 设置当前语言
+// Set current language
 func SetLang(lang string) error {
 	if lang != LangZH && lang != LangEN {
-		return fmt.Errorf("不支持的语言: %s", lang)
+		return fmt.Errorf("unsupported language: %s", lang)
 	}
 
 	mutex.Lock()
 	currentLang = lang
 	mutex.Unlock()
 
-	// 保存语言设置
 	return saveLangSetting(lang)
 }
 
-// 保存语言设置
+// Save language setting to config file
 func saveLangSetting(lang string) error {
 	configDir := utils.GetConfigDir()
-	// 确保目录存在
 	if err := os.MkdirAll(configDir, 0755); err != nil {
 		return err
 	}
 
-	// 保存语言设置到配置文件
 	configPath := filepath.Join(configDir, "language.json")
 	config := map[string]string{
 		"language": lang,
@@ -565,14 +559,13 @@ func saveLangSetting(lang string) error {
 	return os.WriteFile(configPath, data, 0644)
 }
 
-// 加载语言设置
+// Load language setting from config file
 func init() {
-	// 尝试从配置文件加载语言设置
 	configDir := utils.GetConfigDir()
 	configPath := filepath.Join(configDir, "language.json")
 	data, err := os.ReadFile(configPath)
 	if err != nil {
-		return // 使用默认语言
+		return // Use default language
 	}
 
 	var config map[string]string
@@ -587,22 +580,21 @@ func init() {
 			mutex.Unlock()
 		}
 	}
-	fmt.Println("currentLang: ", string(currentLang))
+	fmt.Println("currentLang:", string(currentLang))
 }
 
-// T 获取翻译文本
+// Get translation text by key
 func T(key string) string {
 	mutex.RLock()
 	defer mutex.RUnlock()
 
-	// 获取当前语言的翻译
 	if trans, ok := translations[currentLang]; ok {
 		if text, ok := trans[key]; ok {
 			return text
 		}
 	}
 
-	// 如果当前语言没有该翻译，尝试使用中文
+	// Try Chinese if current language translation not found
 	if currentLang != LangZH {
 		if trans, ok := translations[LangZH]; ok {
 			if text, ok := trans[key]; ok {
@@ -611,7 +603,7 @@ func T(key string) string {
 		}
 	}
 
-	// 如果中文也没有，尝试使用英文
+	// Try English if Chinese translation not found
 	if currentLang != LangEN {
 		if trans, ok := translations[LangEN]; ok {
 			if text, ok := trans[key]; ok {
@@ -620,23 +612,20 @@ func T(key string) string {
 		}
 	}
 
-	// 如果都没有，返回键名
 	return key
 }
 
-// Tf 获取格式化的翻译文本
+// Get formatted translation text
 func Tf(key string, args ...interface{}) string {
 	text := T(key)
-	// 尝试格式化，如果失败则返回原始文本和参数的简单组合
 	result := fmt.Sprintf(text, args...)
 	if strings.Contains(result, "%!(EXTRA") || strings.Contains(result, "%!(MISSING") {
-		// 格式化失败，使用更安全的方式
 		return fmt.Sprintf("%s: %v", text, args)
 	}
 	return result
 }
 
-// GetSystemPrompt 获取当前语言的系统提示
+// Get system prompt in current language
 func GetSystemPrompt() string {
 	return T("ai_system_prompt")
 }
