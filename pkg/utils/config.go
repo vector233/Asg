@@ -6,12 +6,10 @@ import (
 	"runtime"
 )
 
-// GetConfigDir 获取适合当前操作系统的配置目录
+// GetConfigDir returns the appropriate configuration directory for the current operating system
 func GetConfigDir() string {
-	// 首先尝试获取应用程序数据目录
 	var appDataDir string
 
-	// 根据不同操作系统获取适当的配置目录
 	switch runtime.GOOS {
 	case "windows":
 		// Windows: %APPDATA%\AsgGPT\configs
@@ -27,13 +25,11 @@ func GetConfigDir() string {
 		}
 	}
 
-	// 如果无法确定应用数据目录，则使用用户主目录下的 .AsgGPT 目录
 	if appDataDir == "" {
 		homeDir, err := os.UserHomeDir()
 		if err == nil {
 			appDataDir = filepath.Join(homeDir, ".AsgGPT", "configs")
 		} else {
-			// 最后的后备方案：使用当前目录
 			appDataDir = filepath.Join(".", "configs")
 		}
 	}
@@ -41,10 +37,7 @@ func GetConfigDir() string {
 	return appDataDir
 }
 
-// GetExamplesDir 获取示例配置目录
+// GetExamplesDir returns the examples configuration directory
 func GetExamplesDir() string {
-	// 获取基础配置目录的父目录
-	baseDir := filepath.Dir(GetConfigDir())
-	// 返回 examples 子目录
-	return filepath.Join(baseDir, "examples")
+	return filepath.Join(filepath.Dir(GetConfigDir()), "examples")
 }

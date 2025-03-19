@@ -22,7 +22,7 @@ type ChatMessage struct {
 	Time    time.Time
 }
 
-// GUI 结构体用于存储GUI相关的状态和组件
+// GUI struct stores GUI-related states and components
 type GUI struct {
 	window              fyne.Window
 	aiConfig            ai.AIConfig
@@ -37,7 +37,7 @@ type GUI struct {
 	configFiles         []string
 	configSelect        *widget.Select
 
-	// 新增字段：跟踪活动的对话框
+	// Track active dialogs
 	activeDialogs []dialog.Dialog
 }
 
@@ -48,31 +48,31 @@ func RunGUI() {
 	w := a.NewWindow(i18n.T("app_title"))
 	w.Resize(fyne.NewSize(1000, 700))
 
-	// 创建GUI实例
+	// Create GUI instance
 	gui := &GUI{
 		window: w,
 	}
 
-	// 初始化AI配置
+	// Initialize AI configuration
 	gui.initAIConfig()
 
-	// 初始化聊天界面
+	// Initialize chat interface
 	gui.initChatInterface()
 
-	// 初始化JSON编辑器
+	// Initialize JSON editor
 	gui.initJSONEditor()
 
-	// 初始化配置目录
+	// Initialize configuration directory
 	gui.initConfigDir()
 
-	// 创建主布局
+	// Create main layout
 	content := gui.createMainLayout()
 
 	w.SetContent(content)
 	w.ShowAndRun()
 }
 
-// initAIConfig 初始化AI配置
+// initAIConfig initializes AI configuration
 func (g *GUI) initAIConfig() {
 	aiConfig, err := ai.LoadAIConfig()
 	if err != nil {
@@ -82,7 +82,7 @@ func (g *GUI) initAIConfig() {
 	g.client = ai.NewAIClient(aiConfig)
 }
 
-// initJSONEditor 初始化JSON编辑器
+// initJSONEditor initializes JSON editor
 func (g *GUI) initJSONEditor() {
 	g.jsonEditor = widget.NewMultiLineEntry()
 	g.jsonEditor.SetPlaceHolder(i18n.T("json_editor_placeholder"))
@@ -90,14 +90,14 @@ func (g *GUI) initJSONEditor() {
 	g.jsonEditor.SetMinRowsVisible(3)
 }
 
-// createJSONContainer 创建JSON编辑器容器
+// createJSONContainer creates JSON editor container
 func (g *GUI) createJSONContainer() fyne.CanvasObject {
-	// 添加格式化按钮
+	// Add format button
 	formatButton := widget.NewButtonWithIcon(i18n.T("format_json"), theme.DocumentIcon(), func() {
 		g.formatJSON()
 	})
 
-	// 创建标题栏，包含标题和格式化按钮
+	// Create title bar with title and format button
 	titleBar := container.NewBorder(
 		nil, nil, nil, formatButton,
 		widget.NewLabel(i18n.T("json_config")),
@@ -110,15 +110,15 @@ func (g *GUI) createJSONContainer() fyne.CanvasObject {
 	)
 }
 
-// 添加 formatJSON 方法用于格式化 JSON
+// formatJSON formats the JSON content
 func (g *GUI) formatJSON() {
-	// 获取当前文本
+	// Get current text
 	currentText := g.jsonEditor.Text
 	if currentText == "" {
 		return
 	}
 
-	// 解析并格式化 JSON
+	// Parse and format JSON
 	var jsonData interface{}
 	err := json.Unmarshal([]byte(currentText), &jsonData)
 	if err != nil {
@@ -126,40 +126,40 @@ func (g *GUI) formatJSON() {
 		return
 	}
 
-	// 重新格式化 JSON
+	// Reformat JSON
 	formattedJSON, err := json.MarshalIndent(jsonData, "", "  ")
 	if err != nil {
 		dialog.ShowError(fmt.Errorf(i18n.Tf("json_format_failed"), err), g.window)
 		return
 	}
 
-	// 更新编辑器内容
+	// Update editor content
 	g.jsonEditor.SetText(string(formattedJSON))
 	g.statusLabel.SetText(i18n.T("json_formatted"))
 }
 
-// createMainLayout 创建主布局
+// createMainLayout creates the main layout
 func (g *GUI) createMainLayout() fyne.CanvasObject {
-	// 创建聊天容器
+	// Create chat container
 	chatContainer := g.createChatContainer()
 
-	// 创建JSON编辑器容器
+	// Create JSON editor container
 	jsonContainer := g.createJSONContainer()
 
-	// 创建分割视图
+	// Create split view
 	split := container.NewHSplit(
 		chatContainer,
 		jsonContainer,
 	)
-	split.SetOffset(0.5) // 设置分割比例
+	split.SetOffset(0.5) // Set split ratio
 
-	// 创建工具栏
+	// Create toolbar
 	toolbar := g.createToolbar()
 
-	// 创建按钮容器
+	// Create button container
 	buttonContainer := g.createButtonContainer()
 
-	// 创建主布局
+	// Create main layout
 	return container.NewBorder(
 		toolbar,
 		container.NewVBox(g.statusLabel, buttonContainer),
@@ -169,37 +169,32 @@ func (g *GUI) createMainLayout() fyne.CanvasObject {
 	)
 }
 
-// createButtonContainer 创建按钮容器
+// createButtonContainer creates button container
 func (g *GUI) createButtonContainer() fyne.CanvasObject {
-	// 执行按钮
 	executeBtn := widget.NewButtonWithIcon(i18n.T("execute_config"), theme.MediaPlayIcon(), func() {
 		g.executeConfig()
 	})
 
-	// 保存按钮
 	saveBtn := widget.NewButtonWithIcon(i18n.T("save_config"), theme.DocumentSaveIcon(), func() {
 		g.saveConfig()
 	})
 
-	// 获取坐标按钮
 	getPositionBtn := widget.NewButtonWithIcon(i18n.T("get_position"), theme.VisibilityIcon(), func() {
 		g.getMousePosition()
 	})
 
-	// 获取程序信息按钮
 	getProcessBtn := widget.NewButtonWithIcon(i18n.T("get_process_info"), theme.ComputerIcon(), func() {
 		g.getProcessInfo()
 	})
+
 	getForegroundAppBtn := widget.NewButtonWithIcon(i18n.T("get_foreground_app"), theme.ComputerIcon(), func() {
 		g.getForegroundApp()
 	})
 
-	// 设置按钮
 	settingsBtn := widget.NewButtonWithIcon(i18n.T("ai_settings"), theme.SettingsIcon(), func() {
 		g.showAISettings()
 	})
 
-	// 返回按钮容器
 	return container.NewHBox(
 		executeBtn,
 		saveBtn,

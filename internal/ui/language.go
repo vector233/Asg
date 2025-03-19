@@ -7,9 +7,8 @@ import (
 	"github.com/vector233/AsgGPT/internal/i18n"
 )
 
-// createLanguageSelector 创建语言选择器
+// createLanguageSelector creates and returns a language selection widget
 func (g *GUI) createLanguageSelector() fyne.CanvasObject {
-	// 创建语言选择下拉框
 	langSelect := widget.NewSelect(
 		[]string{i18n.T("language_zh"), i18n.T("language_en")},
 		func(selected string) {
@@ -20,19 +19,16 @@ func (g *GUI) createLanguageSelector() fyne.CanvasObject {
 				lang = i18n.LangEN
 			}
 
-			// 设置语言
 			err := i18n.SetLang(lang)
 			if err != nil {
 				g.statusLabel.SetText(err.Error())
 				return
 			}
 
-			// 提示用户重启应用
 			g.statusLabel.SetText(i18n.T("restart_required"))
 		},
 	)
 
-	// 设置当前选中的语言
 	currentLang := i18n.GetCurrentLang()
 	if currentLang == i18n.LangZH {
 		langSelect.SetSelected(i18n.T("language_zh"))
@@ -40,7 +36,6 @@ func (g *GUI) createLanguageSelector() fyne.CanvasObject {
 		langSelect.SetSelected(i18n.T("language_en"))
 	}
 
-	// 创建语言选择容器
 	return container.NewHBox(
 		widget.NewLabel(i18n.T("language")),
 		langSelect,
