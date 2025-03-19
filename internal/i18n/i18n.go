@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 
@@ -277,6 +278,8 @@ func getDefaultZHTranslations() map[string]string {
 		"app_launched_path":                "已启动应用 (路径: %s)",
 
 		// AI系统提示
+		"system_info_macos":   "当前系统是 macOS，请生成适用于 macOS 的自动化配置。",
+		"system_info_windows": "当前系统是 Windows，请生成适用于 Windows 的自动化配置。",
 		"ai_system_prompt": `你是一个自动化脚本生成助手。请根据用户的描述，生成符合以下格式的 JSON 配置：
 {
   "name": "任务名称",
@@ -295,7 +298,9 @@ func getDefaultZHTranslations() map[string]string {
 3. type: 输入文本 - text (要输入的文本)
 4. key: 按键 - key (键名), modifiers (修饰键数组，如 ["control", "shift"])
 5. sleep: 等待 - duration (秒)
-6. activate: 激活窗口 - process_name (进程名)
+6. activate: 激活窗口
+   - macOS: 支持 process_name (进程名) 或 bundle_id (应用程序包标识符)
+   - Windows: 支持 process_name (进程名) 或 window_handle (窗口句柄)
 7. if: 条件判断 - condition (条件), then_actions (满足条件时的操作), else_actions (不满足条件时的操作)
 8. for: 循环 - count (次数), loop_actions (循环操作)
 
@@ -488,6 +493,8 @@ func getDefaultENTranslations() map[string]string {
 		"no_valid_json_simple":          "No valid JSON found",
 
 		// AI系统提示
+		"system_info_macos":   "Current system is macOS, please generate automation configuration for macOS.",
+		"system_info_windows": "Current system is Windows, please generate automation configuration for Windows.",
 		"ai_system_prompt": `You are an automation script generator assistant. Based on the user's description, please generate a JSON configuration in the following format:
 {
   "name": "Task Name",
@@ -506,7 +513,9 @@ Supported action types and fields:
 3. type: Type text - text (text to type)
 4. key: Press key - key (key name), modifiers (modifier key array, e.g. ["control", "shift"])
 5. sleep: Wait - duration (seconds)
-6. activate: Activate window - process_name (process name)
+6. activate: Activate window
+   - macOS: Supports process_name (process name) or bundle_id (application bundle identifier)
+   - Windows: Supports process_name (process name) or window_handle (window handle)
 7. if: Conditional - condition (condition), then_actions (actions when condition is met), else_actions (actions when condition is not met)
 8. for: Loop - count (number of times), loop_actions (loop actions)
 
@@ -625,7 +634,15 @@ func Tf(key string, args ...interface{}) string {
 	return result
 }
 
-// Get system prompt in current language
+// GetSystemPrompt returns the system prompt with OS-specific information
 func GetSystemPrompt() string {
-	return T("ai_system_prompt")
+	var osInfo string
+	switch runtime.GOOS {
+	case "darwin":
+		osInfo = T("system_info_macos")
+	case "windows":
+		osInfo = T("system_info_windows")
+	}
+
+	return osInfo + "\n" + T("ai_system_prompt")
 }

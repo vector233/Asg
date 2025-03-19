@@ -159,6 +159,7 @@ func safeKeyTap(key string, modifiers []string) {
 		}
 	}()
 
+	// Handle special keys
 	validKeys := map[string]bool{
 		"enter": true, "tab": true, "space": true, "backspace": true, "delete": true,
 		"escape": true, "up": true, "down": true, "left": true, "right": true,
@@ -167,24 +168,38 @@ func safeKeyTap(key string, modifiers []string) {
 		"f6": true, "f7": true, "f8": true, "f9": true, "f10": true,
 		"f11": true, "f12": true, "f13": true, "f14": true, "f15": true,
 		"f16": true, "f17": true, "f18": true, "f19": true, "f20": true,
+		"return": true,
 	}
 
-	if len(key) == 1 && !validKeys[key] {
-		if len(modifiers) > 0 {
-			fmt.Printf(i18n.T("warning_single_char_modifiers")+"\n", key)
-		}
-		robotgo.TypeStr(key)
-		return
-	}
-
-	if len(modifiers) > 0 {
-		mods := make([]interface{}, len(modifiers))
-		for i, mod := range modifiers {
+	// Convert modifiers to robotgo format
+	mods := make([]interface{}, len(modifiers))
+	for i, mod := range modifiers {
+		// Convert common modifier names
+		switch strings.ToLower(mod) {
+		case "command", "cmd", "super":
+			mods[i] = "command"
+		case "control", "ctrl":
+			mods[i] = "control"
+		case "alt", "option":
+			mods[i] = "alt"
+		case "shift":
+			mods[i] = "shift"
+		default:
 			mods[i] = mod
 		}
+	}
+
+	// Handle all keys with KeyTap
+	if len(key) == 1 {
+		// For single characters, use the character itself
+		err := robotgo.KeyTap(key, mods...)
+		fmt.Println(err)
+	} else if validKeys[key] {
+		// For special keys
 		robotgo.KeyTap(key, mods...)
 	} else {
-		robotgo.KeyTap(key)
+		// For other cases
+		robotgo.TypeStr(key)
 	}
 }
 
