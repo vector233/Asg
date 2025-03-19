@@ -13,54 +13,54 @@ import (
 	"github.com/vector233/AsgGPT/internal/i18n"
 )
 
-// initChatInterface 初始化聊天界面
+// initChatInterface initializes the chat interface
 func (g *GUI) initChatInterface() {
-	// 添加欢迎消息
+	// Add welcome message
 	g.chatMessages = append(g.chatMessages, ChatMessage{
 		Content: i18n.T("welcome_message"),
 		IsUser:  false,
 		Time:    time.Now(),
 	})
 
-	// 创建聊天显示区域
+	// Create chat display area
 	g.chatDisplay = widget.NewRichText()
 	g.chatDisplay.Wrapping = fyne.TextWrapWord
 
-	// 状态标签
+	// Status label
 	g.statusLabel = widget.NewLabel("")
 
-	// 创建消息输入框
+	// Create message input box
 	g.messageInput = widget.NewMultiLineEntry()
 	g.messageInput.SetPlaceHolder(i18n.T("input_placeholder"))
 	g.messageInput.Wrapping = fyne.TextWrapWord
 	g.messageInput.SetMinRowsVisible(3)
 
-	// 更新聊天显示
+	// Update chat display
 	g.updateChatDisplay()
 }
 
-// createChatContainer 创建聊天容器
+// createChatContainer creates the chat container
 func (g *GUI) createChatContainer() fyne.CanvasObject {
-	// 创建复制按钮
+	// Create copy button
 	copyButton := widget.NewButtonWithIcon(i18n.T("copy_last_message"), theme.ContentCopyIcon(), func() {
 		g.copyLastMessage()
 	})
 
-	// 创建发送按钮
+	// Create send button
 	sendButton := widget.NewButtonWithIcon(i18n.T("send"), theme.MailSendIcon(), func() {
 		g.sendMessage()
 	})
 
-	// 创建可滚动的聊天显示容器
+	// Create scrollable chat display container
 	g.chatScrollContainer = container.NewScroll(g.chatDisplay)
 
-	// 创建输入容器
+	// Create input container
 	inputContainer := container.NewBorder(
 		nil, nil, nil, sendButton,
 		g.messageInput,
 	)
 
-	// 创建聊天容器
+	// Create chat container
 	return container.NewBorder(
 		container.NewBorder(nil, nil, widget.NewLabel(i18n.T("chat_area")), copyButton, nil),
 		inputContainer,
@@ -69,7 +69,7 @@ func (g *GUI) createChatContainer() fyne.CanvasObject {
 	)
 }
 
-// copyLastMessage 复制最后一条消息
+// copyLastMessage copies the last message
 func (g *GUI) copyLastMessage() {
 	if len(g.chatMessages) > 0 {
 		lastMsg := g.chatMessages[len(g.chatMessages)-1]
@@ -80,38 +80,38 @@ func (g *GUI) copyLastMessage() {
 			content = fmt.Sprintf("AI: %s", lastMsg.Content)
 		}
 
-		// 复制到剪贴板
+		// Copy to clipboard
 		g.window.Clipboard().SetContent(content)
 		g.statusLabel.SetText(i18n.T("last_message_copied"))
 	} else {
 		g.statusLabel.SetText(i18n.T("no_copyable_message"))
 	}
 
-	// 2秒后清除状态消息
+	// Clear status message after 2 seconds
 	go func() {
 		time.Sleep(2 * time.Second)
 		g.statusLabel.SetText("")
 	}()
 }
 
-// sendMessage 发送消息
+// sendMessage sends a message
 func (g *GUI) sendMessage() {
 	userMessage := g.messageInput.Text
 	if userMessage == "" {
 		return
 	}
 
-	// 添加用户消息到聊天
+	// Add user message to chat
 	g.chatMessages = append(g.chatMessages, ChatMessage{
 		Content: userMessage,
 		IsUser:  true,
 		Time:    time.Now(),
 	})
 
-	// 清空输入框
+	// Clear input box
 	g.messageInput.SetText("")
 
-	// 添加"思考中"消息
+	// Add "thinking" message
 	g.chatMessages = append(g.chatMessages, ChatMessage{
 		Content: i18n.T("thinking"),
 		IsUser:  false,
@@ -120,12 +120,12 @@ func (g *GUI) sendMessage() {
 
 	g.updateChatDisplay()
 
-	// 在后台生成响应
+	// Generate response in background
 	go func() {
-		// 生成JSON配置
+		// Generate JSON configuration
 		jsonStr, err := g.client.GenerateJSON(userMessage)
 
-		// 更新"思考中"消息
+		// Update "thinking" message
 		lastIndex := len(g.chatMessages) - 1
 		if err != nil {
 			g.chatMessages[lastIndex] = ChatMessage{
@@ -134,10 +134,10 @@ func (g *GUI) sendMessage() {
 				Time:    time.Now(),
 			}
 		} else {
-			// 格式化JSON以便显示
+			// Format JSON for display
 			var prettyJSON bytes.Buffer
 			if err := json.Indent(&prettyJSON, []byte(jsonStr), "", "  "); err != nil {
-				jsonStr = jsonStr // 如果格式化失败，使用原始JSON
+				jsonStr = jsonStr // If formatting fails, use original JSON
 			} else {
 				jsonStr = prettyJSON.String()
 			}
@@ -148,7 +148,7 @@ func (g *GUI) sendMessage() {
 				Time:    time.Now(),
 			}
 
-			// 更新JSON编辑器
+			// Update JSON editor
 			g.jsonEditor.SetText(jsonStr)
 		}
 
@@ -156,7 +156,7 @@ func (g *GUI) sendMessage() {
 	}()
 }
 
-// updateChatDisplay 更新聊天显示
+// updateChatDisplay updates the chat display
 func (g *GUI) updateChatDisplay() {
 	g.chatDisplay.Segments = []widget.RichTextSegment{}
 	for _, msg := range g.chatMessages {
@@ -187,7 +187,7 @@ func (g *GUI) updateChatDisplay() {
 
 	g.chatDisplay.Refresh()
 
-	// 滚动到底部 - 延迟执行以确保内容已更新
+	// Scroll to bottom - delay execution to ensure content has been updated
 	go func() {
 		time.Sleep(100 * time.Millisecond)
 		if g.chatScrollContainer != nil {
