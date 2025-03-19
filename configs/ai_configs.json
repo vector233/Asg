@@ -1,21 +1,5 @@
 {
   "configs": {
-    "anthropic": {
-      "type": "anthropic",
-      "api_key": "",
-      "model": "claude-3-opus-20240229",
-      "endpoint": "",
-      "api_version": "",
-      "proxy_url": ""
-    },
-    "baidu": {
-      "type": "baidu",
-      "api_key": "",
-      "model": "ERNIE-Bot-4",
-      "endpoint": "",
-      "api_version": "",
-      "proxy_url": ""
-    },
     "deepseek": {
       "type": "deepseek",
       "api_key": "",

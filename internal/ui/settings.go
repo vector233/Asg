@@ -20,7 +20,8 @@ func (g *GUI) showAISettings() {
 		currentPlatform = "openai" // Default platform
 	}
 
-	platforms := []string{"openai", "azure", "anthropic", "gemini", "deepseek"}
+	// 只保留 OpenAI 和 DeepSeek 平台
+	platforms := []string{"openai", "deepseek"}
 	platformSelect := widget.NewSelect(platforms, nil)
 	platformSelect.SetSelected(currentPlatform)
 
@@ -31,19 +32,14 @@ func (g *GUI) showAISettings() {
 	modelSelect.SetSelected(g.aiConfig.Model)
 
 	// Updates model options based on selected platform
+	// 修改模型选项更新函数
 	updateModelOptions := func(platform string) {
 		var models []string
 		switch platform {
 		case "openai":
 			models = []string{"gpt-4", "gpt-4-turbo", "gpt-3.5-turbo"}
-		case "azure":
-			models = []string{"gpt-4", "gpt-3.5-turbo"}
-		case "anthropic":
-			models = []string{"claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"}
-		case "gemini":
-			models = []string{"gemini-pro", "gemini-1.5-pro"}
 		case "deepseek":
-			models = []string{"deepseek-chat", "deepseek-chat"}
+			models = []string{"deepseek-chat", "deepseek-reasoner"}
 		default:
 			models = []string{}
 		}

@@ -28,11 +28,6 @@ func GetAIConfigByType(platformType string) (AIConfig, error) {
 		switch platformType {
 		case AITypeOpenAI:
 			config.Model = "gpt-3.5-turbo"
-		case AITypeAzure:
-			config.Model = "gpt-35-turbo"
-			config.APIVersion = "2023-05-15"
-		case AITypeBaidu:
-			config.Model = "ERNIE-Bot-4"
 		case AITypeDeepSeek:
 			config.Model = "deepseek-chat"
 		}
