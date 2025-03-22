@@ -159,6 +159,13 @@ func safeKeyTap(key string, modifiers []string) {
 		}
 	}()
 
+	// For macOS, use AppleScript for better key handling
+	if runtime.GOOS == "darwin" && len(modifiers) > 0 {
+		if err := macKeyTap(key, modifiers); err == nil {
+			return
+		}
+	}
+
 	// Handle special keys
 	validKeys := map[string]bool{
 		"enter": true, "tab": true, "space": true, "backspace": true, "delete": true,
@@ -171,36 +178,122 @@ func safeKeyTap(key string, modifiers []string) {
 		"return": true,
 	}
 
-	// Convert modifiers to robotgo format
-	mods := make([]interface{}, len(modifiers))
-	for i, mod := range modifiers {
-		// Convert common modifier names
+	// For special keys without modifiers
+	if validKeys[key] && len(modifiers) == 0 {
+		robotgo.KeyTap(key)
+		return
+	}
+
+	// For other cases without modifiers
+	if len(modifiers) == 0 {
+		robotgo.TypeStr(key)
+		return
+	}
+
+	// Fallback for non-macOS or if AppleScript failed
+	// Try manual key press/release sequence
+	standardModifiers := standardizeModifiers(modifiers)
+	
+	// Press all modifiers
+	for _, mod := range standardModifiers {
+		robotgo.KeyToggle(mod, "down")
+	}
+	
+	// Small delay
+	time.Sleep(50 * time.Millisecond)
+	
+	// Press and release the main key
+	if validKeys[key] {
+		robotgo.KeyTap(key)
+	} else {
+		robotgo.TypeStr(key)
+	}
+	
+	// Small delay
+	time.Sleep(50 * time.Millisecond)
+	
+	// Release all modifiers in reverse order
+	for i := len(standardModifiers) - 1; i >= 0; i-- {
+		robotgo.KeyToggle(standardModifiers[i], "up")
+	}
+}
+
+// macKeyTap uses AppleScript to perform key combinations on macOS
+func macKeyTap(key string, modifiers []string) error {
+	// Map for special keys in AppleScript
+	specialKeyMap := map[string]string{
+		"enter": "return", "return": "return", "tab": "tab", "space": "space",
+		"backspace": "delete", "delete": "delete", "escape": "escape", "esc": "escape",
+		"up": "up arrow", "down": "down arrow", "left": "left arrow", "right": "right arrow",
+		"home": "home", "end": "end", "page_up": "page up", "page_down": "page down",
+	}
+
+	// Convert modifiers to AppleScript format
+	var scriptModifiers []string
+	for _, mod := range modifiers {
 		switch strings.ToLower(mod) {
 		case "command", "cmd", "super":
-			mods[i] = "command"
+			scriptModifiers = append(scriptModifiers, "command down")
 		case "control", "ctrl":
-			mods[i] = "control"
+			scriptModifiers = append(scriptModifiers, "control down")
 		case "alt", "option":
-			mods[i] = "alt"
+			scriptModifiers = append(scriptModifiers, "option down")
 		case "shift":
-			mods[i] = "shift"
-		default:
-			mods[i] = mod
+			scriptModifiers = append(scriptModifiers, "shift down")
 		}
 	}
 
-	// Handle all keys with KeyTap
+	// Determine the key to use in AppleScript
+	var scriptKey string
 	if len(key) == 1 {
-		// For single characters, use the character itself
-		err := robotgo.KeyTap(key, mods...)
-		fmt.Println(err)
-	} else if validKeys[key] {
+		// For single characters
+		scriptKey = key
+	} else if mapped, ok := specialKeyMap[key]; ok {
 		// For special keys
-		robotgo.KeyTap(key, mods...)
+		scriptKey = mapped
 	} else {
-		// For other cases
-		robotgo.TypeStr(key)
+		// For function keys
+		if strings.HasPrefix(key, "f") && len(key) <= 3 {
+			scriptKey = key
+		} else {
+			return fmt.Errorf("unsupported key: %s", key)
+		}
 	}
+
+	// Build the AppleScript
+	script := `
+		tell application "System Events"
+			keystroke "` + scriptKey + `" using {` + strings.Join(scriptModifiers, ", ") + `}
+		end tell
+	`
+
+	// Execute the AppleScript
+	cmd := exec.Command("osascript", "-e", script)
+	if err := cmd.Run(); err != nil {
+		return err
+	}
+	
+	return nil
+}
+
+// standardizeModifiers converts modifier names to standard format
+func standardizeModifiers(modifiers []string) []string {
+	result := make([]string, len(modifiers))
+	for i, mod := range modifiers {
+		switch strings.ToLower(mod) {
+		case "command", "cmd", "super":
+			result[i] = "command"
+		case "control", "ctrl":
+			result[i] = "control"
+		case "alt", "option":
+			result[i] = "alt"
+		case "shift":
+			result[i] = "shift"
+		default:
+			result[i] = mod
+		}
+	}
+	return result
 }
 
 // evaluateCondition evaluates a condition expression
