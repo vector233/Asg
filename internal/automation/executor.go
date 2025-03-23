@@ -172,13 +172,6 @@ func safeKeyTap(key string, modifiers []string) {
 		}
 	}
 
-	// For Windows, use a specific implementation
-	if runtime.GOOS == "windows" && len(modifiers) > 0 {
-		if err := windowsKeyTap(key, modifiers); err == nil {
-			return
-		}
-	}
-
 	// Handle special keys
 	validKeys := map[string]bool{
 		"enter": true, "tab": true, "space": true, "backspace": true, "delete": true,
@@ -203,87 +196,36 @@ func safeKeyTap(key string, modifiers []string) {
 		return
 	}
 
-	// Fallback for non-macOS or if AppleScript failed
-	// Try manual key press/release sequence
+	// Generic implementation for all platforms
+	// Standardize modifiers
 	standardModifiers := standardizeModifiers(modifiers)
-
+	
 	// Press all modifiers
 	for _, mod := range standardModifiers {
 		robotgo.KeyToggle(mod, "down")
+		// Small delay between modifier key presses
+		time.Sleep(50 * time.Millisecond)
 	}
-
-	// Small delay
-	time.Sleep(50 * time.Millisecond)
-
+	
+	// Small delay before pressing the main key
+	time.Sleep(100 * time.Millisecond)
+	
 	// Press and release the main key
 	if validKeys[key] {
 		robotgo.KeyTap(key)
 	} else {
 		robotgo.TypeStr(key)
 	}
-
-	// Small delay
-	time.Sleep(50 * time.Millisecond)
-
+	
+	// Small delay before releasing modifiers
+	time.Sleep(100 * time.Millisecond)
+	
 	// Release all modifiers in reverse order
 	for i := len(standardModifiers) - 1; i >= 0; i-- {
 		robotgo.KeyToggle(standardModifiers[i], "up")
-	}
-}
-
-// windowsKeyTap handles key combinations on Windows
-func windowsKeyTap(key string, modifiers []string) error {
-	// Standardize modifiers
-	standardModifiers := standardizeModifiers(modifiers)
-
-	// 映射特殊键名称
-	specialKeyMap := map[string]string{
-		"enter": "enter", "return": "enter", "tab": "tab", "space": "space",
-		"backspace": "backspace", "delete": "delete", "escape": "escape", "esc": "escape",
-		"up": "up", "down": "down", "left": "left", "right": "right",
-		"home": "home", "end": "end", "page_up": "pageup", "page_down": "pagedown",
-	}
-
-	// 处理特殊键映射
-	if mapped, ok := specialKeyMap[strings.ToLower(key)]; ok {
-		key = mapped
-	}
-
-	// 按下所有修饰键
-	for _, mod := range standardModifiers {
-		robotgo.KeyToggle(mod, "down")
-		// 增加修饰键按下之间的延迟
-		time.Sleep(100 * time.Millisecond)
-	}
-
-	// 增加主键按下前的延迟
-	time.Sleep(200 * time.Millisecond)
-
-	// 处理主键
-	if len(key) == 1 {
-		// 对于单个字符，使用KeyToggle按下再释放
-		robotgo.KeyToggle(key, "down")
+		// Small delay between modifier key releases
 		time.Sleep(50 * time.Millisecond)
-		robotgo.KeyToggle(key, "up")
-	} else {
-		// 对于特殊键，使用KeyTap
-		robotgo.KeyTap(key)
 	}
-
-	// 增加释放修饰键前的延迟
-	time.Sleep(200 * time.Millisecond)
-
-	// 按照相反顺序释放所有修饰键
-	for i := len(standardModifiers) - 1; i >= 0; i-- {
-		robotgo.KeyToggle(standardModifiers[i], "up")
-		// 增加修饰键释放之间的延迟
-		time.Sleep(100 * time.Millisecond)
-	}
-
-	// 最终延迟确保所有键盘事件完成
-	time.Sleep(100 * time.Millisecond)
-
-	return nil
 }
 
 // macKeyTap uses AppleScript to perform key combinations on macOS
