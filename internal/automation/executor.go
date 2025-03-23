@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/go-vgo/robotgo"
-	"github.com/vcaesar/bitmap"
 	"github.com/vector233/AsgGPT/internal/i18n"
 )
 
@@ -85,30 +84,6 @@ func ExecuteActions(actions []Action) {
 			case "for":
 				handleForAction(action)
 
-			case "find_image":
-				if action.ImagePath != "" {
-					checkImageExists(action.ImagePath)
-				}
-
-			case "find_image_and_move":
-				if action.ImagePath != "" && checkImageExists(action.ImagePath) {
-					if lastFoundImageX >= 0 && lastFoundImageY >= 0 {
-						robotgo.Move(lastFoundImageX, lastFoundImageY)
-					}
-				}
-
-			case "find_image_and_click":
-				if action.ImagePath != "" && checkImageExists(action.ImagePath) {
-					if lastFoundImageX >= 0 && lastFoundImageY >= 0 {
-						button := action.Button
-						if button == "" {
-							button = "left"
-						}
-						robotgo.Move(lastFoundImageX, lastFoundImageY)
-						time.Sleep(100 * time.Millisecond)
-						robotgo.Click(button, false)
-					}
-				}
 			default:
 				fmt.Printf(i18n.T("unknown_action_type")+"\n", action.Type)
 			}
@@ -261,34 +236,52 @@ func windowsKeyTap(key string, modifiers []string) error {
 	// Standardize modifiers
 	standardModifiers := standardizeModifiers(modifiers)
 
-	// Press all modifiers
-	for _, mod := range standardModifiers {
-		robotgo.KeyToggle(mod, "down")
-		// Add a small delay between modifier key presses
-		time.Sleep(30 * time.Millisecond)
+	// 映射特殊键名称
+	specialKeyMap := map[string]string{
+		"enter": "enter", "return": "enter", "tab": "tab", "space": "space",
+		"backspace": "backspace", "delete": "delete", "escape": "escape", "esc": "escape",
+		"up": "up", "down": "down", "left": "left", "right": "right",
+		"home": "home", "end": "end", "page_up": "pageup", "page_down": "pagedown",
 	}
 
-	// Add a small delay before pressing the main key
-	time.Sleep(50 * time.Millisecond)
+	// 处理特殊键映射
+	if mapped, ok := specialKeyMap[strings.ToLower(key)]; ok {
+		key = mapped
+	}
 
-	// Handle the main key
+	// 按下所有修饰键
+	for _, mod := range standardModifiers {
+		robotgo.KeyToggle(mod, "down")
+		// 增加修饰键按下之间的延迟
+		time.Sleep(100 * time.Millisecond)
+	}
+
+	// 增加主键按下前的延迟
+	time.Sleep(200 * time.Millisecond)
+
+	// 处理主键
 	if len(key) == 1 {
-		// For single characters, use TypeStr
-		robotgo.TypeStr(key)
+		// 对于单个字符，使用KeyToggle按下再释放
+		robotgo.KeyToggle(key, "down")
+		time.Sleep(50 * time.Millisecond)
+		robotgo.KeyToggle(key, "up")
 	} else {
-		// For special keys, use KeyTap
+		// 对于特殊键，使用KeyTap
 		robotgo.KeyTap(key)
 	}
 
-	// Add a small delay before releasing modifiers
-	time.Sleep(50 * time.Millisecond)
+	// 增加释放修饰键前的延迟
+	time.Sleep(200 * time.Millisecond)
 
-	// Release all modifiers in reverse order
+	// 按照相反顺序释放所有修饰键
 	for i := len(standardModifiers) - 1; i >= 0; i-- {
 		robotgo.KeyToggle(standardModifiers[i], "up")
-		// Add a small delay between modifier key releases
-		time.Sleep(30 * time.Millisecond)
+		// 增加修饰键释放之间的延迟
+		time.Sleep(100 * time.Millisecond)
 	}
+
+	// 最终延迟确保所有键盘事件完成
+	time.Sleep(100 * time.Millisecond)
 
 	return nil
 }
@@ -389,76 +382,7 @@ func evaluateCondition(condition string) bool {
 		}
 	}
 
-	// Add image matching condition
-	if strings.HasPrefix(condition, "image_exists:") {
-		imagePath := strings.TrimPrefix(condition, "image_exists:")
-		return checkImageExists(imagePath)
-	}
-
-	// 新增：查找图像并移动到图像位置
-	if strings.HasPrefix(condition, "find_image_and_move:") {
-		imagePath := strings.TrimPrefix(condition, "find_image_and_move:")
-		if checkImageExists(imagePath) && lastFoundImageX >= 0 && lastFoundImageY >= 0 {
-			robotgo.Move(lastFoundImageX, lastFoundImageY)
-			return true
-		}
-		return false
-	}
-
-	// 新增：查找图像并点击图像位置
-	if strings.HasPrefix(condition, "find_image_and_click:") {
-		parts := strings.Split(strings.TrimPrefix(condition, "find_image_and_click:"), ",")
-		imagePath := parts[0]
-		button := "left"
-		if len(parts) > 1 {
-			button = parts[1]
-		}
-
-		if checkImageExists(imagePath) && lastFoundImageX >= 0 && lastFoundImageY >= 0 {
-			robotgo.Move(lastFoundImageX, lastFoundImageY)
-			time.Sleep(100 * time.Millisecond)
-			robotgo.Click(button, false)
-			return true
-		}
-		return false
-	}
-
 	return true
-}
-
-// checkImageExists checks if an image exists on screen
-func checkImageExists(imagePath string) bool {
-	// 导入错误检查
-	if _, err := os.Stat(imagePath); os.IsNotExist(err) {
-		fmt.Printf(i18n.T("image_file_not_found")+"\n", imagePath)
-		return false
-	}
-
-	// 捕获整个屏幕
-	screenBitmap := robotgo.CaptureScreen()
-	defer robotgo.FreeBitmap(screenBitmap)
-
-	// 打开目标图像
-	targetBitmap := bitmap.Open(imagePath)
-	if targetBitmap == nil {
-		fmt.Printf(i18n.T("failed_to_open_image")+"\n", imagePath)
-		return false
-	}
-	defer robotgo.FreeBitmap(targetBitmap)
-
-	// 在屏幕上查找图像
-	fx, fy := bitmap.Find(targetBitmap)
-
-	// 如果找到图像，fx 和 fy 将不为 -1
-	found := fx != -1 && fy != -1
-
-	if found {
-		fmt.Printf(i18n.T("image_found_at")+"\n", imagePath, fx, fy)
-	} else {
-		fmt.Printf(i18n.T("image_not_found")+"\n", imagePath)
-	}
-
-	return found
 }
 
 // parseInt converts string to integer, returns 0 on error
