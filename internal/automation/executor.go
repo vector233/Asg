@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/go-vgo/robotgo"
+	"github.com/vcaesar/bitmap"
 	"github.com/vector233/AsgGPT/internal/i18n"
 )
 
@@ -166,6 +167,13 @@ func safeKeyTap(key string, modifiers []string) {
 		}
 	}
 
+	// For Windows, use a specific implementation
+	if runtime.GOOS == "windows" && len(modifiers) > 0 {
+		if err := windowsKeyTap(key, modifiers); err == nil {
+			return
+		}
+	}
+
 	// Handle special keys
 	validKeys := map[string]bool{
 		"enter": true, "tab": true, "space": true, "backspace": true, "delete": true,
@@ -193,29 +201,66 @@ func safeKeyTap(key string, modifiers []string) {
 	// Fallback for non-macOS or if AppleScript failed
 	// Try manual key press/release sequence
 	standardModifiers := standardizeModifiers(modifiers)
-	
+
 	// Press all modifiers
 	for _, mod := range standardModifiers {
 		robotgo.KeyToggle(mod, "down")
 	}
-	
+
 	// Small delay
 	time.Sleep(50 * time.Millisecond)
-	
+
 	// Press and release the main key
 	if validKeys[key] {
 		robotgo.KeyTap(key)
 	} else {
 		robotgo.TypeStr(key)
 	}
-	
+
 	// Small delay
+	time.Sleep(50 * time.Millisecond)
+
+	// Release all modifiers in reverse order
+	for i := len(standardModifiers) - 1; i >= 0; i-- {
+		robotgo.KeyToggle(standardModifiers[i], "up")
+	}
+}
+
+// windowsKeyTap handles key combinations on Windows
+func windowsKeyTap(key string, modifiers []string) error {
+	// Standardize modifiers
+	standardModifiers := standardizeModifiers(modifiers)
+	
+	// Press all modifiers
+	for _, mod := range standardModifiers {
+		robotgo.KeyToggle(mod, "down")
+		// Add a small delay between modifier key presses
+		time.Sleep(30 * time.Millisecond)
+	}
+	
+	// Add a small delay before pressing the main key
+	time.Sleep(50 * time.Millisecond)
+	
+	// Handle the main key
+	if len(key) == 1 {
+		// For single characters, use TypeStr
+		robotgo.TypeStr(key)
+	} else {
+		// For special keys, use KeyTap
+		robotgo.KeyTap(key)
+	}
+	
+	// Add a small delay before releasing modifiers
 	time.Sleep(50 * time.Millisecond)
 	
 	// Release all modifiers in reverse order
 	for i := len(standardModifiers) - 1; i >= 0; i-- {
 		robotgo.KeyToggle(standardModifiers[i], "up")
+		// Add a small delay between modifier key releases
+		time.Sleep(30 * time.Millisecond)
 	}
+	
+	return nil
 }
 
 // macKeyTap uses AppleScript to perform key combinations on macOS
@@ -272,7 +317,7 @@ func macKeyTap(key string, modifiers []string) error {
 	if err := cmd.Run(); err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
@@ -314,7 +359,48 @@ func evaluateCondition(condition string) bool {
 		}
 	}
 
+	// Add image matching condition
+	if strings.HasPrefix(condition, "image_exists:") {
+		imagePath := strings.TrimPrefix(condition, "image_exists:")
+		return checkImageExists(imagePath)
+	}
+
 	return true
+}
+
+// checkImageExists checks if an image exists on screen
+func checkImageExists(imagePath string) bool {
+	// 导入错误检查
+	if _, err := os.Stat(imagePath); os.IsNotExist(err) {
+		fmt.Printf(i18n.T("image_file_not_found")+"\n", imagePath)
+		return false
+	}
+
+	// 捕获整个屏幕
+	screenBitmap := robotgo.CaptureScreen()
+	defer robotgo.FreeBitmap(screenBitmap)
+
+	// 打开目标图像
+	targetBitmap := bitmap.Open(imagePath)
+	if targetBitmap == nil {
+		fmt.Printf(i18n.T("failed_to_open_image")+"\n", imagePath)
+		return false
+	}
+	defer robotgo.FreeBitmap(targetBitmap)
+
+	// 在屏幕上查找图像
+	fx, fy := bitmap.Find(targetBitmap)
+
+	// 如果找到图像，fx 和 fy 将不为 -1
+	found := fx != -1 && fy != -1
+
+	if found {
+		fmt.Printf(i18n.T("image_found_at")+"\n", imagePath, fx, fy)
+	} else {
+		fmt.Printf(i18n.T("image_not_found")+"\n", imagePath)
+	}
+
+	return found
 }
 
 // parseInt converts string to integer, returns 0 on error

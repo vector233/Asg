@@ -277,6 +277,12 @@ func getDefaultZHTranslations() map[string]string {
 		"app_launch_failed":                "启动应用失败: %v",
 		"app_launched_path":                "已启动应用 (路径: %s)",
 
+		// 图像匹配相关
+		"image_file_not_found": "找不到图像文件: %s",
+		"failed_to_open_image": "无法打开图像文件: %s",
+		"image_found_at":       "在屏幕上找到图像 %s，位置: X=%d, Y=%d",
+		"image_not_found":      "在屏幕上未找到图像: %s",
+
 		// AI系统提示
 		"system_info_macos":   "当前系统是 macOS，请生成适用于 macOS 的自动化配置。",
 		"system_info_windows": "当前系统是 Windows，请生成适用于 Windows 的自动化配置。",
@@ -491,6 +497,12 @@ func getDefaultENTranslations() map[string]string {
 		"response_format_error":         "Response format error",
 		"no_valid_json":                 "No valid JSON found, content: %s",
 		"no_valid_json_simple":          "No valid JSON found",
+
+		// 图像匹配相关
+		"image_file_not_found": "Image file not found: %s",
+		"failed_to_open_image": "Failed to open image file: %s",
+		"image_found_at":       "Image %s found on screen at position: X=%d, Y=%d",
+		"image_not_found":      "Image not found on screen: %s",
 
 		// AI系统提示
 		"system_info_macos":   "Current system is macOS, please generate automation configuration for macOS.",
