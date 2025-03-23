@@ -23,4 +23,5 @@ type Action struct {
 	// Loop fields
 	Count       int      `json:"count,omitempty"`        // Number of iterations
 	LoopActions []Action `json:"loop_actions,omitempty"` // Actions to execute in loop
+	ImagePath   string   `json:"imagePath,omitempty"`
 }

@@ -14,6 +14,12 @@ import (
 	"github.com/vector233/AsgGPT/internal/i18n"
 )
 
+// 添加全局变量来存储最后一次找到的图像坐标
+var (
+	lastFoundImageX = -1
+	lastFoundImageY = -1
+)
+
 // ExecuteConfigFile executes the specified configuration file
 func ExecuteConfigFile(configFile string) error {
 	configData, err := os.ReadFile(configFile)
@@ -79,6 +85,30 @@ func ExecuteActions(actions []Action) {
 			case "for":
 				handleForAction(action)
 
+			case "find_image":
+				if action.ImagePath != "" {
+					checkImageExists(action.ImagePath)
+				}
+
+			case "find_image_and_move":
+				if action.ImagePath != "" && checkImageExists(action.ImagePath) {
+					if lastFoundImageX >= 0 && lastFoundImageY >= 0 {
+						robotgo.Move(lastFoundImageX, lastFoundImageY)
+					}
+				}
+
+			case "find_image_and_click":
+				if action.ImagePath != "" && checkImageExists(action.ImagePath) {
+					if lastFoundImageX >= 0 && lastFoundImageY >= 0 {
+						button := action.Button
+						if button == "" {
+							button = "left"
+						}
+						robotgo.Move(lastFoundImageX, lastFoundImageY)
+						time.Sleep(100 * time.Millisecond)
+						robotgo.Click(button, false)
+					}
+				}
 			default:
 				fmt.Printf(i18n.T("unknown_action_type")+"\n", action.Type)
 			}
@@ -230,17 +260,17 @@ func safeKeyTap(key string, modifiers []string) {
 func windowsKeyTap(key string, modifiers []string) error {
 	// Standardize modifiers
 	standardModifiers := standardizeModifiers(modifiers)
-	
+
 	// Press all modifiers
 	for _, mod := range standardModifiers {
 		robotgo.KeyToggle(mod, "down")
 		// Add a small delay between modifier key presses
 		time.Sleep(30 * time.Millisecond)
 	}
-	
+
 	// Add a small delay before pressing the main key
 	time.Sleep(50 * time.Millisecond)
-	
+
 	// Handle the main key
 	if len(key) == 1 {
 		// For single characters, use TypeStr
@@ -249,17 +279,17 @@ func windowsKeyTap(key string, modifiers []string) error {
 		// For special keys, use KeyTap
 		robotgo.KeyTap(key)
 	}
-	
+
 	// Add a small delay before releasing modifiers
 	time.Sleep(50 * time.Millisecond)
-	
+
 	// Release all modifiers in reverse order
 	for i := len(standardModifiers) - 1; i >= 0; i-- {
 		robotgo.KeyToggle(standardModifiers[i], "up")
 		// Add a small delay between modifier key releases
 		time.Sleep(30 * time.Millisecond)
 	}
-	
+
 	return nil
 }
 
@@ -363,6 +393,34 @@ func evaluateCondition(condition string) bool {
 	if strings.HasPrefix(condition, "image_exists:") {
 		imagePath := strings.TrimPrefix(condition, "image_exists:")
 		return checkImageExists(imagePath)
+	}
+
+	// 新增：查找图像并移动到图像位置
+	if strings.HasPrefix(condition, "find_image_and_move:") {
+		imagePath := strings.TrimPrefix(condition, "find_image_and_move:")
+		if checkImageExists(imagePath) && lastFoundImageX >= 0 && lastFoundImageY >= 0 {
+			robotgo.Move(lastFoundImageX, lastFoundImageY)
+			return true
+		}
+		return false
+	}
+
+	// 新增：查找图像并点击图像位置
+	if strings.HasPrefix(condition, "find_image_and_click:") {
+		parts := strings.Split(strings.TrimPrefix(condition, "find_image_and_click:"), ",")
+		imagePath := parts[0]
+		button := "left"
+		if len(parts) > 1 {
+			button = parts[1]
+		}
+
+		if checkImageExists(imagePath) && lastFoundImageX >= 0 && lastFoundImageY >= 0 {
+			robotgo.Move(lastFoundImageX, lastFoundImageY)
+			time.Sleep(100 * time.Millisecond)
+			robotgo.Click(button, false)
+			return true
+		}
+		return false
 	}
 
 	return true
