@@ -608,3 +608,141 @@ func ActivateApplicationByBundleID(bundleID string) error {
 
 	return nil
 }
+
+// GetWindowHandlesByProcessName 获取指定进程名称的所有窗口句柄
+func GetWindowHandlesByProcessName(processName string) ([]ProcessInfo, error) {
+	script := fmt.Sprintf(`
+		Add-Type @"
+		using System;
+		using System.Runtime.InteropServices;
+		using System.Diagnostics;
+		using System.Text;
+		using System.Collections.Generic;
+
+		public class WindowFinder {
+			[DllImport("user32.dll")]
+			public static extern bool EnumWindows(EnumWindowsProc enumProc, IntPtr lParam);
+			
+			[DllImport("user32.dll")]
+			public static extern int GetWindowThreadProcessId(IntPtr hWnd, out int processId);
+			
+			[DllImport("user32.dll")]
+			public static extern bool IsWindowVisible(IntPtr hWnd);
+			
+			[DllImport("user32.dll")]
+			public static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
+			
+			[DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+			public static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
+			
+			public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+			
+			public static string FindWindowsByProcessName(string processName) {
+				List<string> results = new List<string>();
+				
+				// 获取所有指定名称的进程
+				Process[] processes = Process.GetProcessesByName(processName);
+				if (processes.Length == 0) {
+					// 尝试移除.exe后缀再查找
+					if (processName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)) {
+						processName = processName.Substring(0, processName.Length - 4);
+						processes = Process.GetProcessesByName(processName);
+					}
+				}
+				
+				// 如果没有找到进程，返回空结果
+				if (processes.Length == 0) {
+					return "";
+				}
+				
+				// 创建进程ID集合，用于快速查找
+				HashSet<int> processIds = new HashSet<int>();
+				foreach (Process process in processes) {
+					processIds.Add(process.Id);
+				}
+				
+				// 枚举所有窗口
+				EnumWindows(delegate(IntPtr hWnd, IntPtr lParam) {
+					// 检查窗口是否可见
+					if (IsWindowVisible(hWnd)) {
+						int pid = 0;
+						GetWindowThreadProcessId(hWnd, out pid);
+						
+						// 检查窗口是否属于目标进程
+						if (processIds.Contains(pid)) {
+							StringBuilder title = new StringBuilder(256);
+							GetWindowText(hWnd, title, 256);
+							
+							StringBuilder className = new StringBuilder(256);
+							GetClassName(hWnd, className, 256);
+							
+							// 获取进程信息
+							Process process = Process.GetProcessById(pid);
+							string path = "";
+							try {
+								if (process.MainModule != null) {
+									path = process.MainModule.FileName;
+								}
+							} catch {}
+							
+							// 格式化结果: 进程名,PID,路径,窗口标题,窗口句柄,窗口类名
+							results.Add(string.Format("{0},{1},{2},{3},{4},{5}", 
+								process.ProcessName, 
+								pid, 
+								path, 
+								title.ToString(), 
+								hWnd.ToInt64(), 
+								className.ToString()));
+						}
+					}
+					return true;
+				}, IntPtr.Zero);
+				
+				return string.Join("|", results);
+			}
+		}
+"@
+		
+		[WindowFinder]::FindWindowsByProcessName("%s")
+	`, processName)
+
+	cmd := exec.Command("powershell", "-WindowStyle", "Hidden", "-ExecutionPolicy", "Bypass", "-Command", script)
+	output, err := cmd.Output()
+	if err != nil {
+		return nil, fmt.Errorf("获取窗口句柄失败: %v", err)
+	}
+
+	result := []ProcessInfo{}
+	outputStr := strings.TrimSpace(string(output))
+	
+	if outputStr == "" {
+		return result, nil
+	}
+	
+	// 解析结果
+	windows := strings.Split(outputStr, "|")
+	for _, window := range windows {
+		parts := strings.Split(window, ",")
+		if len(parts) < 5 {
+			continue
+		}
+		
+		var pid int
+		fmt.Sscanf(parts[1], "%d", &pid)
+		
+		var hwnd int64
+		fmt.Sscanf(parts[4], "%d", &hwnd)
+		
+		info := ProcessInfo{
+			Name:         parts[0],
+			Path:         parts[2],
+			PID:          pid,
+			WindowTitle:  parts[3],
+			WindowHandle: hwnd,
+		}
+		
+		result = append(result, info)
+	}
+	
+	return result, nil
+}

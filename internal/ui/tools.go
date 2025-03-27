@@ -134,7 +134,42 @@ func (g *GUI) getProcessInfo() {
 				}
 			}
 
-			g.generateActivateConfig(selectedProcess)
+			// 如果是Windows系统，尝试获取窗口句柄
+			if runtime.GOOS == "windows" && selectedProcess.WindowHandle == 0 {
+				// 显示进度对话框
+				progressBar := widget.NewProgressBarInfinite()
+				handleProgress := dialog.NewCustomWithoutButtons(
+					i18n.T("getting_window_handle"),
+					container.NewVBox(
+						widget.NewLabel(i18n.T("searching_windows")),
+						progressBar,
+					),
+					g.window)
+				handleProgress.Show()
+
+				go func() {
+					// 尝试通过进程名获取窗口句柄
+					windows, err := automation.GetWindowHandlesByProcessName(selectedProcess.Name)
+					handleProgress.Hide()
+
+					if err == nil && len(windows) > 0 {
+						// 使用找到的第一个窗口句柄
+						selectedProcess.WindowHandle = windows[0].WindowHandle
+						selectedProcess.WindowTitle = windows[0].WindowTitle
+
+						// 如果找到多个窗口，可以考虑让用户选择
+						if len(windows) > 1 {
+							g.statusLabel.SetText(i18n.Tf("found_multiple_windows", len(windows)))
+						} else {
+							g.statusLabel.SetText(i18n.Tf("found_window_handle", selectedProcess.WindowHandle))
+						}
+					}
+
+					g.generateActivateConfig(selectedProcess)
+				}()
+			} else {
+				g.generateActivateConfig(selectedProcess)
+			}
 		}
 
 		content := container.NewBorder(
