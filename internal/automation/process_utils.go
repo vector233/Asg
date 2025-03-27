@@ -191,9 +191,10 @@ func getRunningProcessesWindows() ([]ProcessInfo, error) {
 
 		name := strings.Trim(parts[0], "\"")
 
-		if systemProcesses[name] || 
-		   len(parts) >= 3 && strings.Trim(parts[2], "\"") == "Services" ||
-		   addedProcesses[name] {
+		// 跳过系统进程和已添加的进程
+		if systemProcesses[name] ||
+			len(parts) >= 3 && strings.Trim(parts[2], "\"") == "Services" ||
+			addedProcesses[name] {
 			continue
 		}
 
@@ -215,10 +216,6 @@ func getRunningProcessesWindows() ([]ProcessInfo, error) {
 					break
 				}
 			}
-		}
-
-		if path == "" {
-			continue
 		}
 
 		addedProcesses[name] = true
@@ -368,42 +365,42 @@ func ActivateWindowByHandle(hwnd int64) error {
 func getSystemProcessBlacklist() map[string]bool {
 	return map[string]bool{
 		"System Idle Process": true,
-		"System":             true,
-		"Secure System":      true,
-		"Registry":           true,
-		"smss.exe":          true,
-		"csrss.exe":         true,
-		"wininit.exe":       true,
-		"services.exe":      true,
-		"LsaIso.exe":        true,
-		"lsass.exe":         true,
-		"svchost.exe":       true,
-		"fontdrvhost.exe":   true,
-		"WUDFHost.exe":      true,
-		"winlogon.exe":      true,
-		"dwm.exe":           true,
-		"Memory Compression": true,
-		"conhost.exe":       true,
-		"WmiPrvSE.exe":      true,
-		
+		"System":              true,
+		"Secure System":       true,
+		"Registry":            true,
+		"smss.exe":            true,
+		"csrss.exe":           true,
+		"wininit.exe":         true,
+		"services.exe":        true,
+		"LsaIso.exe":          true,
+		"lsass.exe":           true,
+		"svchost.exe":         true,
+		"fontdrvhost.exe":     true,
+		"WUDFHost.exe":        true,
+		"winlogon.exe":        true,
+		"dwm.exe":             true,
+		"Memory Compression":  true,
+		"conhost.exe":         true,
+		"WmiPrvSE.exe":        true,
+
 		// System UI and services
-		"ShellExperienceHost.exe": true,
-		"SearchHost.exe":          true,
-		"RuntimeBroker.exe":       true,
+		"ShellExperienceHost.exe":   true,
+		"SearchHost.exe":            true,
+		"RuntimeBroker.exe":         true,
 		"SecurityHealthService.exe": true,
-		
+
 		// Terminal related
 		"WindowsTerminal.exe": true,
 		"powershell.exe":      true,
-		
+
 		// Development tools
 		"gopls.exe": true,
-		
+
 		// WSL related
-		"wsl.exe":      true,
-		"wslhost.exe":  true,
+		"wsl.exe":       true,
+		"wslhost.exe":   true,
 		"vmcompute.exe": true,
-		
+
 		// Audio and system utilities
 		"audiodg.exe":  true,
 		"tasklist.exe": true,
