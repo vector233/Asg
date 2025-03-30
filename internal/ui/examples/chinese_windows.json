@@ -77,24 +77,6 @@
       "duration": 1
     },
     {
-      "type": "for",
-      "count": 3,
-      "loop_actions": [
-        {
-          "type": "type",
-          "text": "循环测试行 "
-        },
-        {
-          "type": "key",
-          "key": "return"
-        },
-        {
-          "type": "sleep",
-          "duration": 0.3
-        }
-      ]
-    },
-    {
       "type": "key",
       "key": "s",
       "modifiers": ["ctrl"]

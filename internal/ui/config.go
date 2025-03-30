@@ -195,6 +195,16 @@ func (g *GUI) createToolbar() fyne.CanvasObject {
 	g.configSelect = widget.NewSelect(g.configFiles, func(selected string) {
 		g.loadConfigFile(selected)
 	})
+	
+	// 如果有默认配置文件，立即设置为选中状态
+	if g.defaultConfigFile != "" {
+		for _, file := range g.configFiles {
+			if file == g.defaultConfigFile {
+				g.configSelect.SetSelected(g.defaultConfigFile)
+				break
+			}
+		}
+	}
 
 	// Refresh button
 	refreshButton := widget.NewButtonWithIcon("", theme.ViewRefreshIcon(), func() {
