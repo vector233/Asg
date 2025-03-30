@@ -10,13 +10,9 @@ import (
 	"time"
 
 	"github.com/go-vgo/robotgo"
-	"github.com/vector233/Asg/internal/i18n"
-)
 
-// 添加全局变量来存储最后一次找到的图像坐标
-var (
-	lastFoundImageX = -1
-	lastFoundImageY = -1
+	"github.com/vector233/Asg/internal/i18n"
+	"github.com/vector233/Asg/internal/model"
 )
 
 // ExecuteConfigFile executes the specified configuration file
@@ -26,7 +22,7 @@ func ExecuteConfigFile(configFile string) error {
 		return fmt.Errorf(i18n.T("read_config_file_failed"), err)
 	}
 
-	var config Config
+	var config model.Config
 	err = json.Unmarshal(configData, &config)
 	if err != nil {
 		return fmt.Errorf(i18n.T("parse_config_file_failed"), err)
@@ -40,7 +36,7 @@ func ExecuteConfigFile(configFile string) error {
 }
 
 // ExecuteActions executes a series of automation actions
-func ExecuteActions(actions []Action) {
+func ExecuteActions(actions []model.Action) {
 	for i, action := range actions {
 		fmt.Printf(i18n.T("executing_action")+"\n", i+1, action.Type)
 
@@ -92,7 +88,7 @@ func ExecuteActions(actions []Action) {
 }
 
 // handleActivateAction handles the activate action type
-func handleActivateAction(action Action) {
+func handleActivateAction(action model.Action) {
 	if action.WindowHandle != 0 {
 		err := ActivateWindowByHandle(action.WindowHandle)
 		if err != nil {
@@ -107,7 +103,7 @@ func handleActivateAction(action Action) {
 }
 
 // fallbackActivation attempts alternative activation methods
-func fallbackActivation(action Action) {
+func fallbackActivation(action model.Action) {
 	if action.ProcessName != "" {
 		activateProcess(action.ProcessName)
 	} else if action.BundleID != "" {
@@ -130,7 +126,7 @@ func fallbackActivation(action Action) {
 }
 
 // handleIfAction handles the if action type
-func handleIfAction(action Action) {
+func handleIfAction(action model.Action) {
 	conditionMet := evaluateCondition(action.Condition)
 	fmt.Printf(i18n.T("condition_result")+"\n", action.Condition, conditionMet)
 
@@ -144,7 +140,7 @@ func handleIfAction(action Action) {
 }
 
 // handleForAction handles the for action type
-func handleForAction(action Action) {
+func handleForAction(action model.Action) {
 	count := action.Count
 	if count <= 0 {
 		count = 1 // Default to at least one iteration

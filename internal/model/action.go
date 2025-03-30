@@ -1,4 +1,4 @@
-package automation
+package model
 
 // Action represents an automation operation
 type Action struct {

@@ -1,4 +1,4 @@
-package automation
+package model
 
 // Config represents an automation configuration
 type Config struct {
