@@ -111,8 +111,8 @@ jobs:
           cp Asg-zh.app/Contents/Info.plist Asg-en.app/Contents/Info.plist
           
           # 打包为 zip 文件
-          ditto -c -k --keepParent Asg-zh.app Asg-macos-zh.zip
-          ditto -c -k --keepParent Asg-en.app Asg-macos-en.zip
+          ditto -c -k --keepParent Asg-zh.app Asg-zh.zip
+          ditto -c -k --keepParent Asg-en.app Asg-en.zip
           
           # 如果有代码签名证书，可以在这里添加签名步骤
           # codesign --force --options runtime --sign "Developer ID Application: Your Name (TEAM_ID)" Asg-zh.app
@@ -122,13 +122,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset_name }}-zh
-          path: ${{ matrix.os == 'macos-latest' && 'Asg-macos-zh.zip' || matrix.output_name }}-zh
+          path: ${{ matrix.os == 'macos-latest' && 'Asg-zh.zip' || matrix.output_name }}-zh
 
       - name: Upload English build
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset_name }}-en
-          path: ${{ matrix.os == 'macos-latest' && 'Asg-macos-en.zip' || matrix.output_name }}-en
+          path: ${{ matrix.os == 'macos-latest' && 'Asg-en.zip' || matrix.output_name }}-en
 
   release:
     name: Create Release
@@ -146,8 +146,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            Asg-macos-zh/Asg-macos-zh.zip
-            Asg-macos-en/Asg-macos-en.zip
+            Asg-macos-zh/Asg-zh.zip
+            Asg-macos-en/Asg-en.zip
             Asg-windows-zh/Asg-windows.exe-zh
             Asg-windows-en/Asg-windows.exe-en
           draft: false
