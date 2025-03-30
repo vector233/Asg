@@ -113,22 +113,38 @@ jobs:
           # 打包为 zip 文件
           ditto -c -k --keepParent Asg-zh.app Asg-zh.zip
           ditto -c -k --keepParent Asg-en.app Asg-en.zip
-          
-          # 如果有代码签名证书，可以在这里添加签名步骤
-          # codesign --force --options runtime --sign "Developer ID Application: Your Name (TEAM_ID)" Asg-zh.app
-          # codesign --force --options runtime --sign "Developer ID Application: Your Name (TEAM_ID)" Asg-en.app
 
-      - name: Upload Chinese build
+      # 为 macOS 上传中文构建
+      - name: Upload Chinese build for macOS
+        if: matrix.os == 'macos-latest'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset_name }}-zh
-          path: ${{ matrix.os == 'macos-latest' && 'Asg-zh.zip' || matrix.output_name }}-zh
+          path: Asg-zh.zip
 
-      - name: Upload English build
+      # 为 macOS 上传英文构建
+      - name: Upload English build for macOS
+        if: matrix.os == 'macos-latest'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset_name }}-en
-          path: ${{ matrix.os == 'macos-latest' && 'Asg-en.zip' || matrix.output_name }}-en
+          path: Asg-en.zip
+          
+      # 为 Windows 上传中文构建
+      - name: Upload Chinese build for Windows
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}-zh
+          path: ${{ matrix.output_name }}-zh
+
+      # 为 Windows 上传英文构建
+      - name: Upload English build for Windows
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}-en
+          path: ${{ matrix.output_name }}-en
 
   release:
     name: Create Release
