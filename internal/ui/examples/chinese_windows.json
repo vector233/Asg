@@ -1,0 +1,177 @@
+{
+  "name": "Windows中文自动化示例",
+  "description": "演示在Windows系统中常用的中文自动化操作",
+  "actions": [
+    {
+      "type": "key",
+      "key": "r",
+      "modifiers": ["win"]
+    },
+    {
+      "type": "sleep",
+      "duration": 0.5
+    },
+    {
+      "type": "type",
+      "text": "notepad"
+    },
+    {
+      "type": "key",
+      "key": "return"
+    },
+    {
+      "type": "sleep",
+      "duration": 1
+    },
+    {
+      "type": "type",
+      "text": "这是一个Windows自动化测试"
+    },
+    {
+      "type": "key",
+      "key": "return"
+    },
+    {
+      "type": "type",
+      "text": "全选后复制粘贴示例："
+    },
+    {
+      "type": "key",
+      "key": "a",
+      "modifiers": ["ctrl"],
+      "description": "全选文本"
+    },
+    {
+      "type": "sleep",
+      "duration": 0.5
+    },
+    {
+      "type": "key",
+      "key": "c",
+      "modifiers": ["ctrl"],
+      "description": "复制选中文本"
+    },
+    {
+      "type": "sleep",
+      "duration": 0.5
+    },
+    {
+      "type": "for",
+      "count": 2,
+      "description": "粘贴文本2次",
+      "loop_actions": [
+        {
+          "type": "key",
+          "key": "v",
+          "modifiers": ["ctrl"],
+          "description": "粘贴文本"
+        },
+        {
+          "type": "sleep",
+          "duration": 0.5
+        }
+      ]
+    },
+    {
+      "type": "sleep",
+      "duration": 1
+    },
+    {
+      "type": "for",
+      "count": 3,
+      "loop_actions": [
+        {
+          "type": "type",
+          "text": "循环测试行 "
+        },
+        {
+          "type": "key",
+          "key": "return"
+        },
+        {
+          "type": "sleep",
+          "duration": 0.3
+        }
+      ]
+    },
+    {
+      "type": "key",
+      "key": "s",
+      "modifiers": ["ctrl"]
+    },
+    {
+      "type": "sleep",
+      "duration": 1
+    },
+    {
+      "type": "type",
+      "text": "自动化测试.txt"
+    },
+    {
+      "type": "key",
+      "key": "return"
+    },
+    {
+      "type": "if",
+      "condition": "window_exists:Edge",
+      "then_actions": [
+        {
+          "type": "activate",
+          "process_name": "msedge.exe"
+        },
+        {
+          "type": "sleep",
+          "duration": 1
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "modifiers": ["ctrl"]
+        },
+        {
+          "type": "sleep",
+          "duration": 0.5
+        },
+        {
+          "type": "type",
+          "text": "https://www.baidu.com"
+        },
+        {
+          "type": "key",
+          "key": "return"
+        }
+      ],
+      "else_actions": [
+        {
+          "type": "key",
+          "key": "r",
+          "modifiers": ["win"]
+        },
+        {
+          "type": "sleep",
+          "duration": 0.5
+        },
+        {
+          "type": "type",
+          "text": "msedge"
+        },
+        {
+          "type": "key",
+          "key": "return"
+        },
+        {
+          "type": "sleep",
+          "duration": 3
+        },
+        {
+          "type": "type",
+          "text": "https://www.baidu.com"
+        },
+        {
+          "type": "key",
+          "key": "return"
+        }
+      ]
+    }
+  ]
+}

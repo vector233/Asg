@@ -171,7 +171,7 @@ func safeKeyTap(key string, modifiers []string) {
 	// Standardize modifiers
 	standardModifiers := standardizeModifiers(modifiers)
 
-	// 映射特殊键名称
+	// Map special key names
 	specialKeyMap := map[string]string{
 		"enter": "enter", "return": "enter", "tab": "tab", "space": "space",
 		"backspace": "backspace", "delete": "delete", "escape": "escape", "esc": "escape",
@@ -179,45 +179,44 @@ func safeKeyTap(key string, modifiers []string) {
 		"home": "home", "end": "end", "page_up": "pageup", "page_down": "pagedown",
 	}
 
-	// 处理特殊键映射
+	// Handle special key mapping
 	if mapped, ok := specialKeyMap[strings.ToLower(key)]; ok {
 		key = mapped
 	}
 
-	// 按下所有修饰键
+	// Press all modifier keys
 	for _, mod := range standardModifiers {
 		robotgo.KeyToggle(mod, "down")
-		// 增加修饰键按下之间的延迟
+		// Add delay between modifier key presses
 		time.Sleep(100 * time.Millisecond)
 	}
 
-	// 增加主键按下前的延迟
+	// Add delay before main key press
 	time.Sleep(200 * time.Millisecond)
 
-	// 处理主键
+	// Handle main key
 	if len(key) == 1 {
-		// 对于单个字符，使用KeyToggle按下再释放
+		// For single characters, use KeyToggle to press and release
 		robotgo.KeyToggle(key, "down")
 		time.Sleep(50 * time.Millisecond)
 		robotgo.KeyToggle(key, "up")
 	} else {
-		// 对于特殊键，使用KeyTap
+		// For special keys, use KeyTap
 		robotgo.KeyTap(key)
 	}
 
-	// 增加释放修饰键前的延迟
+	// Add delay before releasing modifier keys
 	time.Sleep(200 * time.Millisecond)
 
-	// 按照相反顺序释放所有修饰键
+	// Release all modifier keys in reverse order
 	for i := len(standardModifiers) - 1; i >= 0; i-- {
 		robotgo.KeyToggle(standardModifiers[i], "up")
-		// 增加修饰键释放之间的延迟
+		// Add delay between modifier key releases
 		time.Sleep(100 * time.Millisecond)
 	}
 
-	// 最终延迟确保所有键盘事件完成
+	// Final delay to ensure all keyboard events are completed
 	time.Sleep(100 * time.Millisecond)
-
 }
 
 // macKeyTap uses AppleScript to perform key combinations on macOS
@@ -247,12 +246,18 @@ func macKeyTap(key string, modifiers []string) error {
 
 	// Determine the key to use in AppleScript
 	var scriptKey string
+	var useKeystroke bool = true
+	
 	if len(key) == 1 {
 		// For single characters
 		scriptKey = key
 	} else if mapped, ok := specialKeyMap[key]; ok {
 		// For special keys
 		scriptKey = mapped
+		// For special keys like space, use key code instead of keystroke
+		if key == "space" {
+			useKeystroke = false
+		}
 	} else {
 		// For function keys
 		if strings.HasPrefix(key, "f") && len(key) <= 3 {
@@ -263,11 +268,27 @@ func macKeyTap(key string, modifiers []string) error {
 	}
 
 	// Build the AppleScript
-	script := `
-		tell application "System Events"
-			keystroke "` + scriptKey + `" using {` + strings.Join(scriptModifiers, ", ") + `}
-		end tell
-	`
+	var script string
+	if useKeystroke {
+		script = `
+			tell application "System Events"
+				keystroke "` + scriptKey + `" using {` + strings.Join(scriptModifiers, ", ") + `}
+			end tell
+		`
+	} else {
+		// For special keys like space, use key code
+		var keyCode string
+		switch key {
+		case "space":
+			keyCode = "49" // Key code for space key
+		}
+		
+		script = `
+			tell application "System Events"
+				key code ` + keyCode + ` using {` + strings.Join(scriptModifiers, ", ") + `}
+			end tell
+		`
+	}
 
 	// Execute the AppleScript
 	cmd := exec.Command("osascript", "-e", script)

@@ -1,0 +1,146 @@
+{
+  "name": "macOS中文自动化示例",
+  "description": "演示在macOS系统中常用的中文自动化操作",
+  "actions": [
+    {
+      "type": "key",
+      "key": "space",
+      "modifiers": ["command"]
+    },
+    {
+      "type": "sleep",
+      "duration": 1
+    },
+    {
+      "type": "type",
+      "text": "备忘录"
+    },
+    {
+      "type": "sleep",
+      "duration": 0.5
+    },
+    {
+      "type": "key",
+      "key": "return"
+    },
+    {
+      "type": "sleep",
+      "duration": 2
+    },
+    {
+      "type": "type",
+      "text": "这是一个macOS自动化测试"
+    },
+    {
+      "type": "key",
+      "key": "return"
+    },
+    {
+      "type": "type",
+      "text": "全选后复制粘贴示例："
+    },
+    {
+      "type": "key",
+      "key": "a",
+      "modifiers": ["command"],
+      "description": "全选文本"
+    },
+    {
+      "type": "sleep",
+      "duration": 0.5
+    },
+    {
+      "type": "key",
+      "key": "c",
+      "modifiers": ["command"],
+      "description": "复制选中文本"
+    },
+    {
+      "type": "sleep",
+      "duration": 0.5
+    },
+    {
+      "type": "for",
+      "count": 2,
+      "description": "粘贴文本2次",
+      "loop_actions": [
+        {
+          "type": "key",
+          "key": "v",
+          "modifiers": ["command"],
+          "description": "粘贴文本"
+        },
+        {
+          "type": "sleep",
+          "duration": 0.5
+        }
+      ]
+    },
+    {
+      "type": "sleep",
+      "duration": 1
+    },
+    {
+      "type": "if",
+      "condition": "window_exists:Safari",
+      "then_actions": [
+        {
+          "type": "activate",
+          "process_name": "Safari"
+        },
+        {
+          "type": "sleep",
+          "duration": 1
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "modifiers": ["command"]
+        },
+        {
+          "type": "sleep",
+          "duration": 0.5
+        },
+        {
+          "type": "type",
+          "text": "https://www.baidu.com"
+        },
+        {
+          "type": "key",
+          "key": "return"
+        }
+      ],
+      "else_actions": [
+        {
+          "type": "key",
+          "key": "space",
+          "modifiers": ["command"]
+        },
+        {
+          "type": "sleep",
+          "duration": 0.5
+        },
+        {
+          "type": "type",
+          "text": "Safari"
+        },
+        {
+          "type": "key",
+          "key": "return"
+        },
+        {
+          "type": "sleep",
+          "duration": 3
+        },
+        {
+          "type": "type",
+          "text": "https://www.baidu.com"
+        },
+        {
+          "type": "key",
+          "key": "return"
+        }
+      ]
+    }
+  ]
+}

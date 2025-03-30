@@ -2,6 +2,7 @@ package ui
 
 import (
 	"bytes"
+	"embed"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -19,6 +20,9 @@ import (
 	"github.com/vector233/Asg/internal/i18n"
 	"github.com/vector233/Asg/pkg/utils"
 )
+
+//go:embed examples/*.json
+var embeddedExamples embed.FS
 
 // UIConfig stores UI related configuration
 type UIConfig struct {
@@ -89,99 +93,65 @@ func (g *GUI) initConfigDir() {
 
 // generateExampleConfigs generates example configuration files
 func (g *GUI) generateExampleConfigs() {
-	// Get current language
+	// Get current language and operating system
 	currentLang := i18n.GetCurrentLang()
+	currentOS := utils.GetCurrentOS()
 
-	// Select example configuration content based on language
-	var defaultExample string
+	// 从嵌入的资源中提取示例配置文件
+	g.extractEmbeddedExamples()
 
+	// 确定默认加载的配置文件名
+	var defaultFileName string
+
+	// 根据语言和操作系统选择默认配置文件
 	if currentLang == i18n.LangZH {
-		// Chinese example
-		defaultExample = `{
-  "name": "自动化任务示例",
-  "description": "这是一个示例任务，展示了支持的各种操作类型",
-  "actions": [
-    {
-      "type": "move",
-      "x": 500,
-      "y": 500,
-      "description": "移动鼠标到屏幕中央位置"
-    },
-    {
-      "type": "sleep",
-      "duration": 1,
-      "description": "等待1秒"
-    },
-    {
-      "type": "click",
-      "button": "left",
-      "description": "执行左键点击"
-    },
-    {
-      "type": "sleep",
-      "duration": 0.5,
-      "description": "等待0.5秒"
-    },
-    {
-      "type": "type",
-      "text": "这是通过Asg自动化工具输入的文本",
-      "description": "输入文本"
-    },
-    {
-      "type": "key",
-      "key": "return",
-      "description": "按回车键"
-    }
-  ]
-}`
+		if currentOS == "windows" {
+			defaultFileName = "chinese_windows.json"
+		} else {
+			defaultFileName = "chinese_macos.json"
+		}
 	} else {
-		// English example
-		defaultExample = `{
-  "name": "Automation Task Example",
-  "description": "This is an example task that demonstrates various supported operation types",
-  "actions": [
-    {
-      "type": "move",
-      "x": 500,
-      "y": 500,
-      "description": "Move mouse to the center of the screen"
-    },
-    {
-      "type": "sleep",
-      "duration": 1,
-      "description": "Wait for 1 second"
-    },
-    {
-      "type": "click",
-      "button": "left",
-      "description": "Perform left click"
-    },
-    {
-      "type": "sleep",
-      "duration": 0.5,
-      "description": "Wait for 0.5 seconds"
-    },
-    {
-      "type": "type",
-      "text": "This is text input through the Asg automation tool",
-      "description": "Input text"
-    },
-    {
-      "type": "key",
-      "key": "return",
-      "description": "Press Enter key"
-    }
-  ]
-}`
+		if currentOS == "windows" {
+			defaultFileName = "english_windows.json"
+		} else {
+			defaultFileName = "english_macos.json"
+		}
 	}
 
-	// Target file path
-	targetPath := filepath.Join(g.configDir, "default.json")
+	// 设置默认选中的配置文件
+	g.defaultConfigFile = defaultFileName
+}
 
-	// Check if target file already exists
-	if _, err := os.Stat(targetPath); os.IsNotExist(err) {
-		// Target file doesn't exist, create example configuration
-		os.WriteFile(targetPath, []byte(defaultExample), 0644)
+// extractEmbeddedExamples 从嵌入的资源中提取示例配置文件
+func (g *GUI) extractEmbeddedExamples() {
+	// 读取嵌入的示例目录
+	entries, err := embeddedExamples.ReadDir("examples")
+	if err != nil {
+		fmt.Printf("读取嵌入的示例文件失败: %v\n", err)
+		return
+	}
+
+	// 遍历所有嵌入的示例文件
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".json") {
+			continue
+		}
+
+		// 读取嵌入的文件内容
+		content, err := embeddedExamples.ReadFile(filepath.Join("examples", entry.Name()))
+		if err != nil {
+			fmt.Printf("读取嵌入的文件 %s 失败: %v\n", entry.Name(), err)
+			continue
+		}
+
+		// 写入到目标目录，仅当文件不存在时
+		targetPath := filepath.Join(g.configDir, entry.Name())
+		fmt.Println("targetPath:", targetPath)
+		if _, err := os.Stat(targetPath); os.IsNotExist(err) {
+			if err := os.WriteFile(targetPath, content, 0644); err != nil {
+				fmt.Printf("写入文件 %s 失败: %v\n", targetPath, err)
+			}
+		}
 	}
 }
 
@@ -200,6 +170,17 @@ func (g *GUI) updateConfigFiles() {
 	// If dropdown has already been created, update its options
 	if g.configSelect != nil {
 		g.configSelect.Options = g.configFiles
+
+		// 如果有默认配置文件且该文件存在，则自动选择它
+		if g.defaultConfigFile != "" {
+			for _, file := range g.configFiles {
+				if file == g.defaultConfigFile {
+					g.configSelect.SetSelected(g.defaultConfigFile)
+					g.loadConfigFile(g.defaultConfigFile)
+					break
+				}
+			}
+		}
 	}
 }
 

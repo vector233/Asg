@@ -1,0 +1,173 @@
+{
+  "name": "macOS English Automation Example",
+  "description": "Demonstrates common automation tasks in English on macOS",
+  "actions": [
+    {
+      "type": "key",
+      "key": "space",
+      "modifiers": ["command"]
+    },
+    {
+      "type": "sleep",
+      "duration": 1
+    },
+    {
+      "type": "type",
+      "text": "Notes"
+    },
+    {
+      "type": "sleep",
+      "duration": 0.5
+    },
+    {
+      "type": "key",
+      "key": "return"
+    },
+    {
+      "type": "sleep",
+      "duration": 2
+    },
+    {
+      "type": "type",
+      "text": "This is a macOS automation test"
+    },
+    {
+      "type": "key",
+      "key": "return"
+    },
+    {
+      "type": "type",
+      "text": "Copy and paste example:"
+    },
+    {
+      "type": "key",
+      "key": "a",
+      "modifiers": ["command"],
+      "description": "Select all text"
+    },
+    {
+      "type": "sleep",
+      "duration": 0.5
+    },
+    {
+      "type": "key",
+      "key": "c",
+      "modifiers": ["command"],
+      "description": "Copy selected text"
+    },
+    {
+      "type": "sleep",
+      "duration": 0.5
+    },
+    {
+      "type": "for",
+      "count": 2,
+      "description": "Paste text twice",
+      "loop_actions": [
+        {
+          "type": "key",
+          "key": "v",
+          "modifiers": ["command"],
+          "description": "Paste text"
+        },
+        {
+          "type": "sleep",
+          "duration": 0.5
+        }
+      ]
+    },
+    {
+      "type": "sleep",
+      "duration": 1
+    },
+    {
+      "type": "for",
+      "count": 3,
+      "loop_actions": [
+        {
+          "type": "type",
+          "text": "Loop test line "
+        },
+        {
+          "type": "key",
+          "key": "return"
+        },
+        {
+          "type": "sleep",
+          "duration": 0.3
+        }
+      ]
+    },
+    {
+      "type": "if",
+      "condition": "window_exists:Safari",
+      "then_actions": [
+        {
+          "type": "activate",
+          "process_name": "Safari"
+        },
+        {
+          "type": "sleep",
+          "duration": 1
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "modifiers": ["command"]
+        },
+        {
+          "type": "sleep",
+          "duration": 0.5
+        },
+        {
+          "type": "type",
+          "text": "https://www.google.com"
+        },
+        {
+          "type": "key",
+          "key": "return"
+        }
+      ],
+      "else_actions": [
+        {
+          "type": "key",
+          "key": "space",
+          "modifiers": ["command"]
+        },
+        {
+          "type": "sleep",
+          "duration": 0.5
+        },
+        {
+          "type": "type",
+          "text": "Safari"
+        },
+        {
+          "type": "key",
+          "key": "return"
+        },
+        {
+          "type": "sleep",
+          "duration": 3
+        },
+        {
+          "type": "type",
+          "text": "https://www.google.com"
+        },
+        {
+          "type": "key",
+          "key": "return"
+        }
+      ]
+    },
+    {
+      "type": "sleep",
+      "duration": 2
+    },
+    {
+      "type": "key",
+      "key": "w",
+      "modifiers": ["command"]
+    }
+  ]
+}

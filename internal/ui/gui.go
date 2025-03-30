@@ -39,7 +39,8 @@ type GUI struct {
 	configSelect        *widget.Select
 
 	// Track active dialogs
-	activeDialogs []dialog.Dialog
+	activeDialogs     []dialog.Dialog
+	defaultConfigFile string
 }
 
 // RunGUI starts the graphical user interface

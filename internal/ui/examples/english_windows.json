@@ -1,0 +1,177 @@
+{
+  "name": "Windows English Automation Example",
+  "description": "Demonstrates common automation tasks in English on Windows",
+  "actions": [
+    {
+      "type": "key",
+      "key": "r",
+      "modifiers": ["win"]
+    },
+    {
+      "type": "sleep",
+      "duration": 0.5
+    },
+    {
+      "type": "type",
+      "text": "notepad"
+    },
+    {
+      "type": "key",
+      "key": "return"
+    },
+    {
+      "type": "sleep",
+      "duration": 1
+    },
+    {
+      "type": "type",
+      "text": "This is a Windows automation test"
+    },
+    {
+      "type": "key",
+      "key": "return"
+    },
+    {
+      "type": "type",
+      "text": "Copy and paste example:"
+    },
+    {
+      "type": "key",
+      "key": "a",
+      "modifiers": ["ctrl"],
+      "description": "Select all text"
+    },
+    {
+      "type": "sleep",
+      "duration": 0.5
+    },
+    {
+      "type": "key",
+      "key": "c",
+      "modifiers": ["ctrl"],
+      "description": "Copy selected text"
+    },
+    {
+      "type": "sleep",
+      "duration": 0.5
+    },
+    {
+      "type": "for",
+      "count": 2,
+      "description": "Paste text twice",
+      "loop_actions": [
+        {
+          "type": "key",
+          "key": "v",
+          "modifiers": ["ctrl"],
+          "description": "Paste text"
+        },
+        {
+          "type": "sleep",
+          "duration": 0.5
+        }
+      ]
+    },
+    {
+      "type": "sleep",
+      "duration": 1
+    },
+    {
+      "type": "for",
+      "count": 3,
+      "loop_actions": [
+        {
+          "type": "type",
+          "text": "Loop test line "
+        },
+        {
+          "type": "key",
+          "key": "return"
+        },
+        {
+          "type": "sleep",
+          "duration": 0.3
+        }
+      ]
+    },
+    {
+      "type": "key",
+      "key": "s",
+      "modifiers": ["ctrl"]
+    },
+    {
+      "type": "sleep",
+      "duration": 1
+    },
+    {
+      "type": "type",
+      "text": "automation_test.txt"
+    },
+    {
+      "type": "key",
+      "key": "return"
+    },
+    {
+      "type": "if",
+      "condition": "window_exists:Edge",
+      "then_actions": [
+        {
+          "type": "activate",
+          "process_name": "msedge.exe"
+        },
+        {
+          "type": "sleep",
+          "duration": 1
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "modifiers": ["ctrl"]
+        },
+        {
+          "type": "sleep",
+          "duration": 0.5
+        },
+        {
+          "type": "type",
+          "text": "https://www.google.com"
+        },
+        {
+          "type": "key",
+          "key": "return"
+        }
+      ],
+      "else_actions": [
+        {
+          "type": "key",
+          "key": "r",
+          "modifiers": ["win"]
+        },
+        {
+          "type": "sleep",
+          "duration": 0.5
+        },
+        {
+          "type": "type",
+          "text": "msedge"
+        },
+        {
+          "type": "key",
+          "key": "return"
+        },
+        {
+          "type": "sleep",
+          "duration": 3
+        },
+        {
+          "type": "type",
+          "text": "https://www.google.com"
+        },
+        {
+          "type": "key",
+          "key": "return"
+        }
+      ]
+    }
+  ]
+}

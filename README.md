@@ -1,6 +1,6 @@
 # Asg - 自动化脚本生成助手
 
-Asg (Automation Script Generator) 是一个跨平台的自动化工具，可以帮助用户轻松创建和执行自动化任务，无需编程知识。
+Asg (Automation Script Generator) 是一个跨平台的自动化工具，可以通过和 AI 对话帮助用户轻松创建和执行自动化任务，无需编程知识。
 
 ## 主要功能
 
@@ -24,7 +24,7 @@ Asg (Automation Script Generator) 是一个跨平台的自动化工具，可以�
 
 ### GUI模式
 
-直接运行程序，将启动图形界面：
+直接运行程序，将启动图形界面
 
 ```bash
 ./Asg
