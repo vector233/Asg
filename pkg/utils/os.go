@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// GetCurrentOS 返回当前操作系统类型
+// GetCurrentOS returns the current operating system type
 func GetCurrentOS() string {
 	os := runtime.GOOS
 	if strings.Contains(os, "darwin") {

@@ -609,7 +609,7 @@ func ActivateApplicationByBundleID(bundleID string) error {
 	return nil
 }
 
-// GetWindowHandlesByProcessName 获取指定进程名称的所有窗口句柄
+// GetWindowHandlesByProcessName gets all window handles for a specified process name
 func GetWindowHandlesByProcessName(processName string) ([]ProcessInfo, error) {
 	script := fmt.Sprintf(`
 		Add-Type @"
@@ -640,35 +640,35 @@ func GetWindowHandlesByProcessName(processName string) ([]ProcessInfo, error) {
 			public static string FindWindowsByProcessName(string processName) {
 				List<string> results = new List<string>();
 				
-				// 获取所有指定名称的进程
+				// Get all processes with the specified name
 				Process[] processes = Process.GetProcessesByName(processName);
 				if (processes.Length == 0) {
-					// 尝试移除.exe后缀再查找
+					// Try to find without .exe suffix
 					if (processName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)) {
 						processName = processName.Substring(0, processName.Length - 4);
 						processes = Process.GetProcessesByName(processName);
 					}
 				}
 				
-				// 如果没有找到进程，返回空结果
+				// If no process found, return empty result
 				if (processes.Length == 0) {
 					return "";
 				}
 				
-				// 创建进程ID集合，用于快速查找
+				// Create process ID set for quick lookup
 				HashSet<int> processIds = new HashSet<int>();
 				foreach (Process process in processes) {
 					processIds.Add(process.Id);
 				}
 				
-				// 枚举所有窗口
+				// Enumerate all windows
 				EnumWindows(delegate(IntPtr hWnd, IntPtr lParam) {
-					// 检查窗口是否可见
+					// Check if window is visible
 					if (IsWindowVisible(hWnd)) {
 						int pid = 0;
 						GetWindowThreadProcessId(hWnd, out pid);
 						
-						// 检查窗口是否属于目标进程
+						// Check if window belongs to target process
 						if (processIds.Contains(pid)) {
 							StringBuilder title = new StringBuilder(256);
 							GetWindowText(hWnd, title, 256);
@@ -676,7 +676,7 @@ func GetWindowHandlesByProcessName(processName string) ([]ProcessInfo, error) {
 							StringBuilder className = new StringBuilder(256);
 							GetClassName(hWnd, className, 256);
 							
-							// 获取进程信息
+							// Get process information
 							Process process = Process.GetProcessById(pid);
 							string path = "";
 							try {
@@ -685,7 +685,7 @@ func GetWindowHandlesByProcessName(processName string) ([]ProcessInfo, error) {
 								}
 							} catch {}
 							
-							// 格式化结果: 进程名,PID,路径,窗口标题,窗口句柄,窗口类名
+							// Format result: process name,PID,path,window title,window handle,window class name
 							results.Add(string.Format("{0},{1},{2},{3},{4},{5}", 
 								process.ProcessName, 
 								pid, 
@@ -709,7 +709,7 @@ func GetWindowHandlesByProcessName(processName string) ([]ProcessInfo, error) {
 	cmd := exec.Command("powershell", "-WindowStyle", "Hidden", "-ExecutionPolicy", "Bypass", "-Command", script)
 	output, err := cmd.Output()
 	if err != nil {
-		return nil, fmt.Errorf("获取窗口句柄失败: %v", err)
+		return nil, fmt.Errorf("Failed to get window handles: %v", err)
 	}
 
 	result := []ProcessInfo{}
@@ -719,7 +719,7 @@ func GetWindowHandlesByProcessName(processName string) ([]ProcessInfo, error) {
 		return result, nil
 	}
 
-	// 解析结果
+	// Parse results
 	windows := strings.Split(outputStr, "|")
 	for _, window := range windows {
 		parts := strings.Split(window, ",")

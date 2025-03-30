@@ -3,9 +3,9 @@ name: Build and Release
 on:
   push:
     tags:
-      - 'v*' # 当推送带有 v 前缀的标签时触发，例如 v1.0.0
+      - 'v*' # Triggered when pushing a tag with v prefix, e.g. v1.0.0
 
-# 添加权限设置
+# Add permissions
 permissions:
   contents: write
   packages: write
@@ -34,7 +34,7 @@ jobs:
         with:
           go-version: '1.21'
 
-      # 为 macOS 安装依赖
+      # Install macOS dependencies
       - name: Install macOS dependencies
         if: matrix.os == 'macos-latest'
         run: |
@@ -42,7 +42,7 @@ jobs:
           brew install glfw xquartz
           echo "CGO_ENABLED=1" >> $GITHUB_ENV
 
-      # 为 Windows 安装依赖
+      # Install Windows dependencies
       - name: Install Windows dependencies
         if: matrix.os == 'windows-latest'
         run: |
@@ -52,7 +52,7 @@ jobs:
       - name: Install dependencies
         run: go mod download
 
-      # 添加标签信息到构建中
+      # Add tag info to build
       - name: Get tag name
         id: get_tag
         run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
@@ -74,17 +74,17 @@ jobs:
           GOARCH: amd64
           CGO_ENABLED: 1
           
-      # 为 macOS 构建添加代码签名
-      - name: Sign macOS builds
+      # Package macOS builds
+      - name: Package macOS builds
         if: matrix.os == 'macos-latest'
         run: |
-          # 创建应用程序包
+          # Create app bundles
           mkdir -p Asg-zh.app/Contents/MacOS
           mkdir -p Asg-en.app/Contents/MacOS
           cp ${{ matrix.output_name }}-zh Asg-zh.app/Contents/MacOS/Asg
           cp ${{ matrix.output_name }}-en Asg-en.app/Contents/MacOS/Asg
           
-          # 创建 Info.plist 文件
+          # Create Info.plist
           cat > Asg-zh.app/Contents/Info.plist << EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -110,11 +110,11 @@ jobs:
           
           cp Asg-zh.app/Contents/Info.plist Asg-en.app/Contents/Info.plist
           
-          # 打包为 zip 文件
+          # Create zip files
           ditto -c -k --keepParent Asg-zh.app Asg-zh.zip
           ditto -c -k --keepParent Asg-en.app Asg-en.zip
 
-      # 为 macOS 上传中文构建
+      # Upload artifacts for macOS (Chinese)
       - name: Upload Chinese build for macOS
         if: matrix.os == 'macos-latest'
         uses: actions/upload-artifact@v4
@@ -122,7 +122,7 @@ jobs:
           name: ${{ matrix.asset_name }}-zh
           path: Asg-zh.zip
 
-      # 为 macOS 上传英文构建
+      # Upload artifacts for macOS (English)
       - name: Upload English build for macOS
         if: matrix.os == 'macos-latest'
         uses: actions/upload-artifact@v4
@@ -130,7 +130,7 @@ jobs:
           name: ${{ matrix.asset_name }}-en
           path: Asg-en.zip
           
-      # 为 Windows 上传中文构建
+      # Upload artifacts for Windows (Chinese)
       - name: Upload Chinese build for Windows
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v4
@@ -138,7 +138,7 @@ jobs:
           name: ${{ matrix.asset_name }}-zh
           path: ${{ matrix.output_name }}-zh
 
-      # 为 Windows 上传英文构建
+      # Upload artifacts for Windows (English)
       - name: Upload English build for Windows
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v4

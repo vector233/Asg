@@ -97,13 +97,13 @@ func (g *GUI) generateExampleConfigs() {
 	currentLang := i18n.GetCurrentLang()
 	currentOS := utils.GetCurrentOS()
 
-	// 从嵌入的资源中提取示例配置文件
+	// Extract example config files from embedded resources
 	g.extractEmbeddedExamples()
 
-	// 确定默认加载的配置文件名
+	// Determine default config filename
 	var defaultFileName string
 
-	// 根据语言和操作系统选择默认配置文件
+	// Select default config file based on language and OS
 	if currentLang == i18n.LangZH {
 		if currentOS == "windows" {
 			defaultFileName = "chinese_windows.json"
@@ -118,38 +118,38 @@ func (g *GUI) generateExampleConfigs() {
 		}
 	}
 
-	// 设置默认选中的配置文件
+	// Set default config file
 	g.defaultConfigFile = defaultFileName
 }
 
-// extractEmbeddedExamples 从嵌入的资源中提取示例配置文件
+// extractEmbeddedExamples extracts example config files from embedded resources
 func (g *GUI) extractEmbeddedExamples() {
-	// 读取嵌入的示例目录
+	// Read embedded examples directory
 	entries, err := embeddedExamples.ReadDir("examples")
 	if err != nil {
-		fmt.Printf("读取嵌入的示例文件失败: %v\n", err)
+		fmt.Printf("Failed to read embedded examples: %v\n", err)
 		return
 	}
 
-	// 遍历所有嵌入的示例文件
+	// Process all embedded example files
 	for _, entry := range entries {
 		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".json") {
 			continue
 		}
 
-		// 读取嵌入的文件内容
+		// Read embedded file content
 		content, err := embeddedExamples.ReadFile(filepath.Join("examples", entry.Name()))
 		if err != nil {
-			fmt.Printf("读取嵌入的文件 %s 失败: %v\n", entry.Name(), err)
+			fmt.Printf("Failed to read embedded file %s: %v\n", entry.Name(), err)
 			continue
 		}
 
-		// 写入到目标目录，仅当文件不存在时
+		// Write to target directory, only if file doesn't exist
 		targetPath := filepath.Join(g.configDir, entry.Name())
 		fmt.Println("targetPath:", targetPath)
 		if _, err := os.Stat(targetPath); os.IsNotExist(err) {
 			if err := os.WriteFile(targetPath, content, 0644); err != nil {
-				fmt.Printf("写入文件 %s 失败: %v\n", targetPath, err)
+				fmt.Printf("Failed to write file %s: %v\n", targetPath, err)
 			}
 		}
 	}
@@ -171,7 +171,7 @@ func (g *GUI) updateConfigFiles() {
 	if g.configSelect != nil {
 		g.configSelect.Options = g.configFiles
 
-		// 如果有默认配置文件且该文件存在，则自动选择它
+		// If default config file exists, select it automatically
 		if g.defaultConfigFile != "" {
 			for _, file := range g.configFiles {
 				if file == g.defaultConfigFile {
@@ -196,7 +196,7 @@ func (g *GUI) createToolbar() fyne.CanvasObject {
 		g.loadConfigFile(selected)
 	})
 	
-	// 如果有默认配置文件，立即设置为选中状态
+	// If default config file exists, select it immediately
 	if g.defaultConfigFile != "" {
 		for _, file := range g.configFiles {
 			if file == g.defaultConfigFile {

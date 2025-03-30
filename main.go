@@ -10,21 +10,21 @@ import (
 )
 
 func main() {
-	// 定义命令行参数
-	configFile := flag.String("config", "", "配置文件路径")
+	// Define command line arguments
+	configFile := flag.String("config", "", "Path to configuration file")
 
 	flag.Parse()
 
-	// 如果没有指定配置文件，默认启用 GUI 模式
+	// If no configuration file is specified, start GUI mode by default
 	if *configFile == "" {
 		ui.RunGUI()
 		return
 	}
 
-	// 执行配置文件
+	// Execute configuration file
 	err := automation.ExecuteConfigFile(*configFile)
 	if err != nil {
-		fmt.Printf("执行配置失败: %v\n", err)
+		fmt.Printf("Failed to execute configuration: %v\n", err)
 		os.Exit(1)
 	}
 }

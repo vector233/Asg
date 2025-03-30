@@ -53,7 +53,7 @@ func RunGUI() {
 	// Create GUI instance
 	gui := &GUI{
 		window: w,
-		statusLabel: widget.NewLabel(""), // 初始化状态标签
+		statusLabel: widget.NewLabel(""), // Initialize status label
 	}
 
 	// Initialize AI configuration
@@ -73,7 +73,7 @@ func RunGUI() {
 
 	w.SetContent(content)
 	
-	// 在界面显示前，确保选中默认配置文件
+	// Ensure default config file is selected before showing the interface
 	if gui.defaultConfigFile != "" && gui.configSelect != nil {
 		gui.configSelect.SetSelected(gui.defaultConfigFile)
 		gui.loadConfigFile(gui.defaultConfigFile)
