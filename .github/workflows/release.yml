@@ -73,18 +73,62 @@ jobs:
           GOOS: ${{ matrix.os == 'macos-latest' && 'darwin' || 'windows' }}
           GOARCH: amd64
           CGO_ENABLED: 1
+          
+      # 为 macOS 构建添加代码签名
+      - name: Sign macOS builds
+        if: matrix.os == 'macos-latest'
+        run: |
+          # 创建应用程序包
+          mkdir -p Asg-zh.app/Contents/MacOS
+          mkdir -p Asg-en.app/Contents/MacOS
+          cp ${{ matrix.output_name }}-zh Asg-zh.app/Contents/MacOS/Asg
+          cp ${{ matrix.output_name }}-en Asg-en.app/Contents/MacOS/Asg
+          
+          # 创建 Info.plist 文件
+          cat > Asg-zh.app/Contents/Info.plist << EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>CFBundleExecutable</key>
+              <string>Asg</string>
+              <key>CFBundleIdentifier</key>
+              <string>com.vector233.asg</string>
+              <key>CFBundleName</key>
+              <string>Asg</string>
+              <key>CFBundleVersion</key>
+              <string>${{ env.TAG_NAME }}</string>
+              <key>CFBundleShortVersionString</key>
+              <string>${{ env.TAG_NAME }}</string>
+              <key>LSMinimumSystemVersion</key>
+              <string>10.13</string>
+              <key>NSHighResolutionCapable</key>
+              <true/>
+          </dict>
+          </plist>
+          EOF
+          
+          cp Asg-zh.app/Contents/Info.plist Asg-en.app/Contents/Info.plist
+          
+          # 打包为 zip 文件
+          ditto -c -k --keepParent Asg-zh.app Asg-macos-zh.zip
+          ditto -c -k --keepParent Asg-en.app Asg-macos-en.zip
+          
+          # 如果有代码签名证书，可以在这里添加签名步骤
+          # codesign --force --options runtime --sign "Developer ID Application: Your Name (TEAM_ID)" Asg-zh.app
+          # codesign --force --options runtime --sign "Developer ID Application: Your Name (TEAM_ID)" Asg-en.app
 
       - name: Upload Chinese build
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset_name }}-zh
-          path: ${{ matrix.output_name }}-zh
+          path: ${{ matrix.os == 'macos-latest' && 'Asg-macos-zh.zip' || matrix.output_name }}-zh
 
       - name: Upload English build
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset_name }}-en
-          path: ${{ matrix.output_name }}-en
+          path: ${{ matrix.os == 'macos-latest' && 'Asg-macos-en.zip' || matrix.output_name }}-en
 
   release:
     name: Create Release
@@ -102,8 +146,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            Asg-macos-zh/Asg-macos-zh
-            Asg-macos-en/Asg-macos-en
+            Asg-macos-zh/Asg-macos-zh.zip
+            Asg-macos-en/Asg-macos-en.zip
             Asg-windows-zh/Asg-windows.exe-zh
             Asg-windows-en/Asg-windows.exe-en
           draft: false
