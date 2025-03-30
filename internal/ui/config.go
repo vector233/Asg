@@ -14,9 +14,10 @@ import (
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/vector233/AsgGPT/internal/automation"
-	"github.com/vector233/AsgGPT/internal/i18n"
-	"github.com/vector233/AsgGPT/pkg/utils"
+
+	"github.com/vector233/Asg/internal/automation"
+	"github.com/vector233/Asg/internal/i18n"
+	"github.com/vector233/Asg/pkg/utils"
 )
 
 // UIConfig stores UI related configuration
@@ -123,7 +124,7 @@ func (g *GUI) generateExampleConfigs() {
     },
     {
       "type": "type",
-      "text": "这是通过AsgGPT自动化工具输入的文本",
+      "text": "这是通过Asg自动化工具输入的文本",
       "description": "输入文本"
     },
     {
@@ -162,7 +163,7 @@ func (g *GUI) generateExampleConfigs() {
     },
     {
       "type": "type",
-      "text": "This is text input through the AsgGPT automation tool",
+      "text": "This is text input through the Asg automation tool",
       "description": "Input text"
     },
     {

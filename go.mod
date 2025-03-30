@@ -1,4 +1,4 @@
-module github.com/vector233/AsgGPT
+module github.com/vector233/Asg
 
 go 1.24.0
 

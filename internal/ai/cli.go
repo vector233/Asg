@@ -7,7 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/vector233/AsgGPT/internal/automation"
+	"github.com/vector233/Asg/internal/automation"
+	"github.com/vector233/Asg/pkg/utils"
 )
 
 // RunAIDialog starts the AI dialog mode
@@ -67,7 +68,8 @@ func RunAIDialog() error {
 				filename += ".json"
 			}
 
-			savePath := filepath.Join("/Users/huangjiaorong/personal/auto/examples", filename)
+			utils.GetExamplesDir()
+			savePath := filepath.Join(utils.GetExamplesDir(), filename)
 
 			err := os.WriteFile(savePath, []byte(jsonStr), 0644)
 			if err != nil {

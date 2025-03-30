@@ -10,8 +10,8 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
-	"github.com/vector233/AsgGPT/internal/automation"
-	"github.com/vector233/AsgGPT/internal/i18n"
+	"github.com/vector233/Asg/internal/automation"
+	"github.com/vector233/Asg/internal/i18n"
 )
 
 // getMousePosition captures the current mouse position

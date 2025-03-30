@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/vector233/AsgGPT/internal/automation"
-	"github.com/vector233/AsgGPT/internal/ui"
+	"github.com/vector233/Asg/internal/automation"
+	"github.com/vector233/Asg/internal/ui"
 )
 
 func main() {

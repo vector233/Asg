@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/go-vgo/robotgo"
-	"github.com/vector233/AsgGPT/internal/i18n"
+	"github.com/vector233/Asg/internal/i18n"
 )
 
 // 添加全局变量来存储最后一次找到的图像坐标

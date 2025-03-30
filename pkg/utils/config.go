@@ -12,23 +12,23 @@ func GetConfigDir() string {
 
 	switch runtime.GOOS {
 	case "windows":
-		// Windows: %APPDATA%\AsgGPT\configs
+		// Windows: %APPDATA%\Asg\configs
 		appData := os.Getenv("APPDATA")
 		if appData != "" {
-			appDataDir = filepath.Join(appData, "AsgGPT", "configs")
+			appDataDir = filepath.Join(appData, "Asg", "configs")
 		}
 	case "darwin":
-		// macOS: ~/Library/Application Support/AsgGPT/configs
+		// macOS: ~/Library/Application Support/Asg/configs
 		homeDir, err := os.UserHomeDir()
 		if err == nil {
-			appDataDir = filepath.Join(homeDir, "Library", "Application Support", "AsgGPT", "configs")
+			appDataDir = filepath.Join(homeDir, "Library", "Application Support", "Asg", "configs")
 		}
 	}
 
 	if appDataDir == "" {
 		homeDir, err := os.UserHomeDir()
 		if err == nil {
-			appDataDir = filepath.Join(homeDir, ".AsgGPT", "configs")
+			appDataDir = filepath.Join(homeDir, ".Asg", "configs")
 		} else {
 			appDataDir = filepath.Join(".", "configs")
 		}

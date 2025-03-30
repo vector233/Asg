@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/vector233/AsgGPT/internal/i18n"
+	"github.com/vector233/Asg/internal/i18n"
 )
 
 // ProcessInfo stores process information
@@ -714,11 +714,11 @@ func GetWindowHandlesByProcessName(processName string) ([]ProcessInfo, error) {
 
 	result := []ProcessInfo{}
 	outputStr := strings.TrimSpace(string(output))
-	
+
 	if outputStr == "" {
 		return result, nil
 	}
-	
+
 	// 解析结果
 	windows := strings.Split(outputStr, "|")
 	for _, window := range windows {
@@ -726,13 +726,13 @@ func GetWindowHandlesByProcessName(processName string) ([]ProcessInfo, error) {
 		if len(parts) < 5 {
 			continue
 		}
-		
+
 		var pid int
 		fmt.Sscanf(parts[1], "%d", &pid)
-		
+
 		var hwnd int64
 		fmt.Sscanf(parts[4], "%d", &hwnd)
-		
+
 		info := ProcessInfo{
 			Name:         parts[0],
 			Path:         parts[2],
@@ -740,9 +740,9 @@ func GetWindowHandlesByProcessName(processName string) ([]ProcessInfo, error) {
 			WindowTitle:  parts[3],
 			WindowHandle: hwnd,
 		}
-		
+
 		result = append(result, info)
 	}
-	
+
 	return result, nil
 }

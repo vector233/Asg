@@ -6,8 +6,8 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
-	"github.com/vector233/AsgGPT/internal/ai"
-	"github.com/vector233/AsgGPT/internal/i18n"
+	"github.com/vector233/Asg/internal/ai"
+	"github.com/vector233/Asg/internal/i18n"
 )
 
 // showAISettings displays the AI settings dialog

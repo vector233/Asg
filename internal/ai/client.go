@@ -11,12 +11,11 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"strings"
 	"time"
 
-	"github.com/vector233/AsgGPT/internal/i18n"
-	"github.com/vector233/AsgGPT/pkg/utils"
+	"github.com/vector233/Asg/internal/i18n"
+	"github.com/vector233/Asg/pkg/utils"
 )
 
 // Supported AI platforms
@@ -62,35 +61,6 @@ var AIConfigFile string
 func init() {
 	configDir := utils.GetConfigDir()
 	AIConfigFile = filepath.Join(configDir, "ai_configs.json")
-}
-
-// GetConfigDir returns OS-specific config directory
-func GetConfigDir() string {
-	var appDataDir string
-
-	switch runtime.GOOS {
-	case "windows":
-		appData := os.Getenv("APPDATA")
-		if appData != "" {
-			appDataDir = filepath.Join(appData, "AsgGPT", "configs")
-		}
-	case "darwin":
-		homeDir, err := os.UserHomeDir()
-		if err == nil {
-			appDataDir = filepath.Join(homeDir, "Library", "Application Support", "AsgGPT", "configs")
-		}
-	}
-
-	if appDataDir == "" {
-		homeDir, err := os.UserHomeDir()
-		if err == nil {
-			appDataDir = filepath.Join(homeDir, ".AsgGPT", "configs")
-		} else {
-			appDataDir = filepath.Join(".", "configs")
-		}
-	}
-
-	return appDataDir
 }
 
 // LoadAIConfig loads current AI configuration

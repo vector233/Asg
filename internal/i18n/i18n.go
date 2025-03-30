@@ -9,7 +9,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/vector233/AsgGPT/pkg/utils"
+	"github.com/vector233/Asg/pkg/utils"
 )
 
 // Supported languages

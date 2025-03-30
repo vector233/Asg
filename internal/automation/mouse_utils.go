@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-vgo/robotgo"
 	hook "github.com/robotn/gohook"
-	"github.com/vector233/AsgGPT/internal/i18n"
+	"github.com/vector233/Asg/internal/i18n"
 )
 
 // GetMouseClickPosition waits for user click and returns the click position
