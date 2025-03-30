@@ -28,13 +28,10 @@ Run the program directly to launch the graphical interface
 
 ### Example Configurations
 The program includes built-in English example configuration files to help you quickly understand how to create automation scripts:
-
 1. English macOS Example ( english_macos.json ):
-   
    - Demonstrates automation operations in English on macOS systems
    - Includes opening Notes, typing text, select-copy-paste operations, opening Safari, etc.
 2. English Windows Example ( english_windows.json ):
-   
    - Demonstrates automation operations in English on Windows systems
    - Includes opening Notepad, typing text, select-copy-paste operations, opening Edge browser, etc.
 The system will automatically select the appropriate example configuration based on your operating system.

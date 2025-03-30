@@ -14,12 +14,13 @@ import (
 
 // Supported languages
 const (
-	LangZH = "zh"
-	LangEN = "en"
+	LangZH      = "zh"
+	LangEN      = "en"
+	DefaultLang = "en"
 )
 
 var (
-	currentLang  = LangEN // Default language is English
+	currentLang  = DefaultLang // 使用 DefaultLang 而不是硬编码 LangEN
 	translations = make(map[string]map[string]string)
 	mutex        sync.RWMutex
 )
@@ -596,11 +597,19 @@ func init() {
 	configPath := filepath.Join(configDir, "language.json")
 	data, err := os.ReadFile(configPath)
 	if err != nil {
-		return // Use default language
+		// 使用默认语言
+		mutex.Lock()
+		currentLang = DefaultLang
+		mutex.Unlock()
+		return
 	}
 
 	var config map[string]string
 	if err := json.Unmarshal(data, &config); err != nil {
+		// 解析失败时使用默认语言
+		mutex.Lock()
+		currentLang = DefaultLang
+		mutex.Unlock()
 		return
 	}
 
@@ -609,7 +618,17 @@ func init() {
 			mutex.Lock()
 			currentLang = lang
 			mutex.Unlock()
+		} else {
+			// 不支持的语言时使用默认语言
+			mutex.Lock()
+			currentLang = DefaultLang
+			mutex.Unlock()
 		}
+	} else {
+		// 配置中没有语言设置时使用默认语言
+		mutex.Lock()
+		currentLang = DefaultLang
+		mutex.Unlock()
 	}
 	fmt.Println("currentLang:", string(currentLang))
 }
