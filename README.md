@@ -1,31 +1,40 @@
-# Asg - 自动化脚本生成助手
+# Asg - Automation Script Generator
 
-Asg (Automation Script Generator) 是一个跨平台的自动化工具，可以通过和 AI 对话帮助用户轻松创建和执行自动化任务，无需编程知识。
+Asg is a cross-platform automation tool that helps users easily create and execute automation tasks through AI conversation, without requiring programming knowledge.
 
-## 主要功能
+## Main Features
 
-- **自动化任务创建**：通过直观的界面或AI辅助创建自动化脚本
-- **跨平台支持**：支持macOS和Windows系统
-- **多语言支持**：支持中文和英文界面
-- **AI辅助生成**：集成多种AI平台（OpenAI、DeepSeek等）帮助生成自动化脚本
-- **丰富的操作类型**：
-  - 鼠标移动和点击
-  - 键盘输入和快捷键
-  - 应用程序激活
-  - 条件判断
-  - 循环操作
-  - 等待/延时
+- **Automation Task Creation**: Create automation scripts through an intuitive interface or with AI assistance
+- **Cross-Platform Support**: Compatible with macOS and Windows systems
+- **Multi-Language Support**: Supports both Chinese and English interfaces
+- **AI-Assisted Generation**: Integrates various AI platforms (OpenAI, DeepSeek, etc.) to help generate automation scripts
+- **Rich Operation Types**:
+  - Mouse movement and clicks
+  - Keyboard input and shortcuts
+  - Application activation
+  - Conditional logic
+  - Loop operations
+  - Wait/delay functions
 
-## 安装方法
+## Installation
 
-直接下载对应平台的可执行文件，无需安装依赖。
+Simply download the executable file for your platform, no dependencies required.
 
-## 使用方法
+## Usage
 
-### GUI模式
+### GUI Mode
 
-直接运行程序，将启动图形界面
+Run the program directly to launch the graphical interface
 
-```bash
-./Asg
-```
+### Example Configurations
+The program includes built-in English example configuration files to help you quickly understand how to create automation scripts:
+
+1. English macOS Example ( english_macos.json ):
+   
+   - Demonstrates automation operations in English on macOS systems
+   - Includes opening Notes, typing text, select-copy-paste operations, opening Safari, etc.
+2. English Windows Example ( english_windows.json ):
+   
+   - Demonstrates automation operations in English on Windows systems
+   - Includes opening Notepad, typing text, select-copy-paste operations, opening Edge browser, etc.
+The system will automatically select the appropriate example configuration based on your operating system.
