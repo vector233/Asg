@@ -137,8 +137,9 @@ func (g *GUI) extractEmbeddedExamples() {
 			continue
 		}
 
+		embeddedPath := "examples/" + entry.Name()
 		// Read embedded file content
-		content, err := embeddedExamples.ReadFile(filepath.Join("examples", entry.Name()))
+		content, err := embeddedExamples.ReadFile(embeddedPath)
 		if err != nil {
 			fmt.Printf("Failed to read embedded file %s: %v\n", entry.Name(), err)
 			continue
@@ -195,7 +196,7 @@ func (g *GUI) createToolbar() fyne.CanvasObject {
 	g.configSelect = widget.NewSelect(g.configFiles, func(selected string) {
 		g.loadConfigFile(selected)
 	})
-	
+
 	// If default config file exists, select it immediately
 	if g.defaultConfigFile != "" {
 		for _, file := range g.configFiles {
