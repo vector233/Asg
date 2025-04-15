@@ -58,22 +58,33 @@ jobs:
         run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
         shell: bash
 
+      # 修改Windows构建输出名称
       - name: Build for Chinese (macOS/Windows)
         run: |
-          go build -tags ci -ldflags="-X 'github.com/vector233/Asg/internal/i18n.DefaultLang=zh' -X 'github.com/vector233/Asg/internal/version.Version=${{ env.TAG_NAME }}'" -o ${{ matrix.output_name }}-zh
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            go build -tags ci -ldflags="-X 'github.com/vector233/Asg/internal/i18n.DefaultLang=zh' -X 'github.com/vector233/Asg/internal/version.Version=${{ env.TAG_NAME }}'" -o Asg-windows-zh.exe
+          else
+            go build -tags ci -ldflags="-X 'github.com/vector233/Asg/internal/i18n.DefaultLang=zh' -X 'github.com/vector233/Asg/internal/version.Version=${{ env.TAG_NAME }}'" -o ${{ matrix.output_name }}-zh
+          fi
         env:
           GOOS: ${{ matrix.os == 'macos-latest' && 'darwin' || 'windows' }}
           GOARCH: amd64
           CGO_ENABLED: 1
+        shell: bash
 
       - name: Build for English (macOS/Windows)
         run: |
-          go build -tags ci -ldflags="-X 'github.com/vector233/Asg/internal/i18n.DefaultLang=en' -X 'github.com/vector233/Asg/internal/version.Version=${{ env.TAG_NAME }}'" -o ${{ matrix.output_name }}-en
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            go build -tags ci -ldflags="-X 'github.com/vector233/Asg/internal/i18n.DefaultLang=en' -X 'github.com/vector233/Asg/internal/version.Version=${{ env.TAG_NAME }}'" -o Asg-windows-en.exe
+          else
+            go build -tags ci -ldflags="-X 'github.com/vector233/Asg/internal/i18n.DefaultLang=en' -X 'github.com/vector233/Asg/internal/version.Version=${{ env.TAG_NAME }}'" -o ${{ matrix.output_name }}-en
+          fi
         env:
           GOOS: ${{ matrix.os == 'macos-latest' && 'darwin' || 'windows' }}
           GOARCH: amd64
           CGO_ENABLED: 1
-          
+        shell: bash
+
       # Package macOS builds
       - name: Package macOS builds
         if: matrix.os == 'macos-latest'
@@ -129,22 +140,22 @@ jobs:
         with:
           name: ${{ matrix.asset_name }}-en
           path: Asg-en.zip
-          
+
       # Upload artifacts for Windows (Chinese)
       - name: Upload Chinese build for Windows
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset_name }}-zh
-          path: ${{ matrix.output_name }}-zh
-
+          path: Asg-windows-zh.exe
+  
       # Upload artifacts for Windows (English)
       - name: Upload English build for Windows
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset_name }}-en
-          path: ${{ matrix.output_name }}-en
+          path: Asg-windows-en.exe
 
   release:
     name: Create Release
@@ -164,8 +175,8 @@ jobs:
           files: |
             Asg-macos-zh/Asg-zh.zip
             Asg-macos-en/Asg-en.zip
-            Asg-windows-zh/Asg-windows.exe-zh
-            Asg-windows-en/Asg-windows.exe-en
+            Asg-windows-zh/Asg-windows-zh.exe
+            Asg-windows-en/Asg-windows-en.exe
           draft: false
           prerelease: false
           generate_release_notes: true
