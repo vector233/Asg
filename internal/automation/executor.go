@@ -184,6 +184,23 @@ func safeKeyTap(key string, modifiers []string) {
 		key = mapped
 	}
 
+	// 在Windows系统下，为Win+R等组合添加特殊处理
+	if runtime.GOOS == "windows" && len(standardModifiers) > 0 {
+		hasWinKey := false
+		for _, mod := range standardModifiers {
+			if mod == "lcmd" {
+				hasWinKey = true
+				break
+			}
+		}
+
+		// 如果包含Win键，可以考虑使用特殊处理
+		if hasWinKey && len(key) == 1 {
+			// 对于Win+R等常见组合，可以添加特殊处理
+			fmt.Printf("执行Windows组合键: Win+%s\n", key)
+		}
+	}
+
 	// Press all modifier keys
 	for _, mod := range standardModifiers {
 		robotgo.KeyToggle(mod, "down")
@@ -247,7 +264,7 @@ func macKeyTap(key string, modifiers []string) error {
 	// Determine the key to use in AppleScript
 	var scriptKey string
 	var useKeystroke bool = true
-	
+
 	if len(key) == 1 {
 		// For single characters
 		scriptKey = key
@@ -282,7 +299,7 @@ func macKeyTap(key string, modifiers []string) error {
 		case "space":
 			keyCode = "49" // Key code for space key
 		}
-		
+
 		script = `
 			tell application "System Events"
 				key code ` + keyCode + ` using {` + strings.Join(scriptModifiers, ", ") + `}
@@ -305,13 +322,25 @@ func standardizeModifiers(modifiers []string) []string {
 	for i, mod := range modifiers {
 		switch strings.ToLower(mod) {
 		case "command", "cmd", "super":
-			result[i] = "command"
+			if runtime.GOOS == "darwin" {
+				result[i] = "command"
+			} else if runtime.GOOS == "windows" {
+				result[i] = "lcmd" // 在Windows下使用lcmd表示左Win键
+			} else {
+				result[i] = "super"
+			}
 		case "control", "ctrl":
 			result[i] = "control"
 		case "alt", "option":
 			result[i] = "alt"
 		case "shift":
 			result[i] = "shift"
+		case "win", "windows":
+			if runtime.GOOS == "windows" {
+				result[i] = "lcmd" // 在Windows下使用lcmd表示Win键
+			} else {
+				result[i] = mod
+			}
 		default:
 			result[i] = mod
 		}
