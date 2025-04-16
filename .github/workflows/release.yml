@@ -32,7 +32,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.21'
+          go-version: '1.24.0'
 
       # Add tag info to build
       - name: Get tag name
@@ -130,8 +130,16 @@ jobs:
       - name: Install Windows dependencies
         if: matrix.os == 'windows-latest'
         run: |
-          echo "CGO_ENABLED=1" >> $env:GITHUB_ENV
           choco install mingw
+          echo "CGO_ENABLED=1" >> $env:GITHUB_ENV
+          # 显示环境信息以便调试
+          go version
+          gcc --version
+          echo "PATH=$env:PATH"
+
+      # Install dependencies
+      - name: Install dependencies
+        run: go mod download
 
       # Build for Windows (Chinese)
       - name: Build for Chinese (Windows)
@@ -157,9 +165,18 @@ jobs:
       - name: Package Windows builds
         if: matrix.os == 'windows-latest'
         run: |
-          # 创建压缩文件
-          Compress-Archive -Path ${{ matrix.output_name }}-zh.exe -DestinationPath Asg-zh.zip
-          Compress-Archive -Path ${{ matrix.output_name }}-en.exe -DestinationPath Asg-en.zip
+          # 创建发布目录
+          mkdir -p release-zh
+          mkdir -p release-en
+          
+          # 复制可执行文件到发布目录
+          cp ${{ matrix.output_name }}-zh.exe release-zh/
+          cp ${{ matrix.output_name }}-en.exe release-en/
+          
+          # 创建zip文件
+          Compress-Archive -Path release-zh\* -DestinationPath ${{ matrix.output_name }}-zh.zip
+          Compress-Archive -Path release-en\* -DestinationPath ${{ matrix.output_name }}-en.zip
+        shell: pwsh
 
       # Upload artifacts for Windows (Chinese)
       - name: Upload Chinese build for Windows
@@ -167,7 +184,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset_name }}-zh
-          path: Asg-zh.zip
+          path: ${{ matrix.output_name }}-zh.zip
 
       # Upload artifacts for Windows (English)
       - name: Upload English build for Windows
@@ -175,7 +192,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset_name }}-en
-          path: Asg-en.zip
+          path: ${{ matrix.output_name }}-en.zip
 
   release:
     name: Create Release
@@ -188,15 +205,19 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
 
+      # 在 release 任务中添加调试步骤
+      - name: List downloaded artifacts
+        run: find . -type f -name "*.zip" | sort
+        
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            Asg-macos-zh/Asg-zh.zip
-            Asg-macos-en/Asg-en.zip
-            Asg-windows-zh/Asg-zh.zip
-            Asg-windows-en/Asg-en.zip
+            ./Asg-macos-zh/*.zip
+            ./Asg-macos-en/*.zip
+            ./Asg-windows-zh/*.zip
+            ./Asg-windows-en/*.zip
           draft: false
           prerelease: false
           generate_release_notes: true
