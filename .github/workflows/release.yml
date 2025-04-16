@@ -204,20 +204,24 @@ jobs:
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
+        with:
+          path: artifacts
 
-      # 在 release 任务中添加调试步骤
+      # Add debugging to see the actual file structure
       - name: List downloaded artifacts
-        run: find . -type f -name "*.zip" | sort
+        run: |
+          ls -la
+          find artifacts -type f | sort
         
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            ./Asg-macos-zh/*.zip
-            ./Asg-macos-en/*.zip
-            ./Asg-windows-zh/*.zip
-            ./Asg-windows-en/*.zip
+            artifacts/Asg-macos-zh/Asg-zh.zip
+            artifacts/Asg-macos-en/Asg-en.zip
+            artifacts/Asg-windows-zh/Asg-windows-zh.zip
+            artifacts/Asg-windows-en/Asg-windows-en.zip
           draft: false
           prerelease: false
           generate_release_notes: true
