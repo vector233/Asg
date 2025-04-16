@@ -16,14 +16,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest, windows-latest]
+        os: [macos-latest]
         include:
           - os: macos-latest
             output_name: Asg-macos
             asset_name: Asg-macos
-          - os: windows-latest
-            output_name: Asg-windows
-            asset_name: Asg-windows
 
     steps:
       - name: Checkout code
@@ -125,71 +122,6 @@ jobs:
           name: ${{ matrix.asset_name }}-en
           path: Asg-en.zip
 
-      # ===== Windows steps =====
-      # Install Windows dependencies
-      - name: Install Windows dependencies
-        if: matrix.os == 'windows-latest'
-        run: |
-          choco install mingw
-          echo "CGO_ENABLED=1" >> $env:GITHUB_ENV
-
-      # Install dependencies
-      - name: Install dependencies
-        run: go mod download
-
-      # Build for Windows (Chinese)
-      - name: Build for Chinese (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          go build -tags ci -ldflags="-X 'github.com/vector233/Asg/internal/i18n.DefaultLang=zh' -X 'github.com/vector233/Asg/internal/version.Version=${{ env.TAG_NAME }}'" -o ${{ matrix.output_name }}-zh.exe
-        env:
-          GOOS: windows
-          GOARCH: amd64
-          CGO_ENABLED: 1
-
-      # Build for Windows (English)
-      - name: Build for English (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          go build -tags ci -ldflags="-X 'github.com/vector233/Asg/internal/i18n.DefaultLang=en' -X 'github.com/vector233/Asg/internal/version.Version=${{ env.TAG_NAME }}'" -o ${{ matrix.output_name }}-en.exe
-        env:
-          GOOS: windows
-          GOARCH: amd64
-          CGO_ENABLED: 1
-
-      # Package Windows builds
-      - name: Package Windows builds
-        if: matrix.os == 'windows-latest'
-        run: |
-          # 创建发布目录
-          mkdir -p release-zh
-          mkdir -p release-en
-          
-          # 复制可执行文件到发布目录
-          cp ${{ matrix.output_name }}-zh.exe release-zh/
-          cp ${{ matrix.output_name }}-en.exe release-en/
-          
-          # 创建zip文件
-          Compress-Archive -Path release-zh\* -DestinationPath ${{ matrix.output_name }}-zh.zip
-          Compress-Archive -Path release-en\* -DestinationPath ${{ matrix.output_name }}-en.zip
-        shell: pwsh
-
-      # Upload artifacts for Windows (Chinese)
-      - name: Upload Chinese build for Windows
-        if: matrix.os == 'windows-latest'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.asset_name }}-zh
-          path: ${{ matrix.output_name }}-zh.zip
-  
-      # Upload artifacts for Windows (English)
-      - name: Upload English build for Windows
-        if: matrix.os == 'windows-latest'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.asset_name }}-en
-          path: ${{ matrix.output_name }}-en.zip
-
   release:
     name: Create Release
     needs: build
@@ -208,8 +140,6 @@ jobs:
           files: |
             Asg-macos-zh/Asg-zh.zip
             Asg-macos-en/Asg-en.zip
-            Asg-windows-zh/Asg-windows-zh.zip
-            Asg-windows-en/Asg-windows-en.zip
           draft: false
           prerelease: false
           generate_release_notes: true
